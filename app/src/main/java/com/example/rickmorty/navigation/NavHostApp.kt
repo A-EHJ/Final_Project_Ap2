@@ -1,14 +1,12 @@
 package com.example.rickmorty.navigation
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.example.rickmorty.Screen.Rick.CharacterListScreen
+import com.example.rickmorty.Screen.Rick.CharacterScreen
 
 @Composable
 fun NavHostApp(navHostController: NavHostController) {
@@ -18,15 +16,15 @@ fun NavHostApp(navHostController: NavHostController) {
     ) {
         composable<Screen.CharacterList> {
             CharacterListScreen(
-                onCharacterClick = {
+                onCharacterClick = {navHostController.navigate(Screen.CharacterBody(it))}
+            )
+        }
 
-                },
-                onNextPageClick = {
-
-                },
-                onPrevPageClick = {
-
-                }
+        composable<Screen.CharacterBody> {
+            val args = it.toRoute<Screen.CharacterBody>()
+            CharacterScreen(
+                characterId = args.characterId,
+                onBack = { navHostController.popBackStack() }
             )
         }
     }

@@ -8,5 +8,5 @@ sealed class Screen {
     object CharacterList : Screen()
 
     @Serializable
-    data class CharacterBody(val taskId: Int) : Screen()
+    data class CharacterBody(val characterId: Int) : Screen()
 }

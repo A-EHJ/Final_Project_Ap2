@@ -10,10 +10,10 @@ import javax.inject.Inject
 class CharacterRepository @Inject constructor(
     private val characterApi: CharacterApi
 ) {
-    fun getAllCharacters(): Flow<Resource<CharacterResponse>> = flow {
+    fun getAllCharacters(page: Int): Flow<Resource<CharacterResponse>> = flow {
         emit(Resource.Loading())
         try {
-            val users = characterApi.getAllCharacters()
+            val users = characterApi.getAllCharacters(page)
             emit(Resource.Success(users))
         } catch (e: Exception) {
             emit(Resource.Error(e.localizedMessage ?: "An unexpected error occured"))
