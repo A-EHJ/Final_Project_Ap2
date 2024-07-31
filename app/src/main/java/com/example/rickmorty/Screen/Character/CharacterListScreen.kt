@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Rick
+package com.example.rickmorty.Screen.Character
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,14 +43,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.rickmorty.data.local.remote.dto.CharacterDto
 import coil.compose.AsyncImage
+import com.example.rickmorty.data.local.entities.CharacterEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterListScreen(
     viewModel: CharacterListViewModel = hiltViewModel(),
-    onCharacterClick: (Int) -> Unit
+    onCharacterClick: (Int) -> Unit,
+    onPreviousPageClick: () -> Unit = { viewModel.getCharacterLimited(false) },
+    onNextPageClick: () -> Unit = { viewModel.getCharacterLimited(true) },
+    getLocationName: (Int) -> Unit = { }
+
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -60,7 +64,7 @@ fun CharacterListScreen(
             .background(Color.Black),
         topBar = {
             TopAppBar(
-                title = { Text("Character List" , color = Color.White) },
+                title = { Text("Character List", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(39, 43, 51),
                     titleContentColor = Color.White
@@ -92,13 +96,13 @@ fun CharacterListScreen(
                 modifier = Modifier.padding(end = 16.dp, bottom = 16.dp)
             ) {
                 FloatingActionButton(
-                    onClick = { viewModel.getCharacters(nextPage = false) },
+                    onClick = onPreviousPageClick,
                     containerColor = Color.Gray,
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Page")
                 }
                 FloatingActionButton(
-                    onClick = { viewModel.getCharacters(nextPage = true) },
+                    onClick = onNextPageClick,
                     containerColor = Color.Gray,
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Page")
@@ -139,21 +143,12 @@ private fun CharacterListBody(
             )
         } else {
             Spacer(modifier = Modifier.height(16.dp))
-            uiState.errorMessage.let {
-                if (it.isNotEmpty()) {
-                    Text(
-                        text = it,
-                        color = Color.Red,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-            }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(uiState.characters.results.size) { index ->
-                    val character = uiState.characters.results[index]
+                items(uiState.characters.size) { index ->
+                    val character = uiState.characters[index]
                     CharacterItem(character, onCharacterClick)
                 }
             }
@@ -162,7 +157,7 @@ private fun CharacterListBody(
 }
 
 @Composable
-fun CharacterItem(character: CharacterDto, onCharacterClick: (Int) -> Unit) {
+fun CharacterItem(character: CharacterEntity, onCharacterClick: (Int) -> Unit) {
     val titleTextStyle = androidx.compose.ui.text.TextStyle(
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold,
@@ -230,11 +225,11 @@ fun CharacterItem(character: CharacterDto, onCharacterClick: (Int) -> Unit) {
                     style = bodyTextStyle
                 )
                 Text(
-                    text = "Last known Location: ${character.location.name}",
+                    text = "Last known Location: ${character.location_Id}",
                     style = bodyTextStyle
                 )
                 Text(
-                    text = "First seen: ${character.origin.name}",
+                    text = "First seen: ${character.origin_Id}",
                     style = bodyTextStyle
                 )
             }
