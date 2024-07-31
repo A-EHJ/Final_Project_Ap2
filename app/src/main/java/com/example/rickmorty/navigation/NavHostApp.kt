@@ -5,8 +5,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.example.rickmorty.Screen.Rick.CharacterListScreen
-import com.example.rickmorty.Screen.Rick.CharacterScreen
+import com.example.rickmorty.Screen.Character.CharacterListScreen
+import com.example.rickmorty.Screen.Character.CharacterScreen
 
 @Composable
 fun NavHostApp(navHostController: NavHostController) {
@@ -16,7 +16,7 @@ fun NavHostApp(navHostController: NavHostController) {
     ) {
         composable<Screen.CharacterList> {
             CharacterListScreen(
-                onCharacterClick = {navHostController.navigate(Screen.CharacterBody(it))}
+                onCharacterClick = { navHostController.navigate(Screen.CharacterBody(it)) }
             )
         }
 
