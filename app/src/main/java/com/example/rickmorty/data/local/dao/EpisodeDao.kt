@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Update
 import androidx.room.Upsert
 import com.example.rickmorty.data.local.entities.EpisodeEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EpisodeDao {
@@ -15,7 +14,7 @@ interface EpisodeDao {
     suspend fun insert(episode: EpisodeEntity)
 
     @Query("SELECT * FROM episode")
-    fun getAllEpisodes(): Flow<List<EpisodeEntity>>
+    fun getAllEpisodes(): List<EpisodeEntity>
 
     @Query(
         """

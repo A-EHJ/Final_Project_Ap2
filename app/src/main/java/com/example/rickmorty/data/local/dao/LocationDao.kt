@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Update
 import androidx.room.Upsert
 import com.example.rickmorty.data.local.entities.LocationEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LocationDao {
@@ -15,7 +14,7 @@ interface LocationDao {
     suspend fun insert(location: LocationEntity)
 
     @Query("SELECT * FROM location")
-    fun getAllLocations(): Flow<List<LocationEntity>>
+    fun getAllLocations(): List<LocationEntity>
 
     @Query(
         """

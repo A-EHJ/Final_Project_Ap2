@@ -10,5 +10,7 @@ class LocationLocalRepository @Inject constructor(private val locationDao: Locat
     suspend fun insertLocations(locations: List<LocationEntity>) =
         locations.forEach { location -> locationDao.save(location) }
 
+    suspend fun getLocationById(locationId: Int) = locationDao.getLocationById(locationId)
+
     suspend fun deleteLocation(locationId: Int) = locationDao.delete(locationId)
 }

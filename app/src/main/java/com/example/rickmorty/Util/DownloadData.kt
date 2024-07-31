@@ -19,7 +19,7 @@ import com.example.rickmorty.data.repository.Local.LocationResidentLocalReposito
 import javax.inject.Inject
 
 class DownloadData @Inject constructor(
-    
+
 
     private val characterLocalRepository: CharacterLocalRepository,
     private val locationLocalRepository: LocationLocalRepository,
@@ -35,6 +35,8 @@ class DownloadData @Inject constructor(
 ) {
     @SuppressLint("NotConstructor")
     suspend fun downloadData() {
+
+
         val characters = characterDaoToEntities()
         val locations = locationDaoToEntities()
         val episodes = episodeDaoToEntities()
