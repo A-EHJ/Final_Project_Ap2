@@ -68,6 +68,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+    annotationProcessor(libs.androidx.room.compiler)
+
 
     // Testing
     testImplementation(libs.junit)
@@ -97,5 +99,5 @@ dependencies {
     implementation(libs.converter.moshi)
     implementation(libs.logging.interceptor)
 
-    implementation (libs.coil.compose)
+    implementation(libs.coil.compose)
 }
