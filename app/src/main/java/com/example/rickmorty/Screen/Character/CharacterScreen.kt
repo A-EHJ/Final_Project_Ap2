@@ -39,7 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.rickmorty.data.local.entities.CharacterEntity
+import com.example.rickmorty.domain.models.Character
+
 
 val titleTextStyle = androidx.compose.ui.text.TextStyle(
     fontSize = 20.sp,
@@ -57,7 +58,7 @@ val bodyTextStyle = androidx.compose.ui.text.TextStyle(
 fun CharacterScreen(
     viewModel: CharacterBodyViewModel = hiltViewModel(),
     characterId: Int,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -89,7 +90,7 @@ fun CharacterScreen(
 @Composable
 private fun CharacterBody(
     innerPadding: PaddingValues,
-    uiState: CharacterUIState
+    uiState: UIState,
 ) {
     Box(
         modifier = Modifier
@@ -125,7 +126,7 @@ private fun CharacterBody(
 }
 
 @Composable
-fun CharacterDetail(character: CharacterEntity) {
+fun CharacterDetail(character: Character) {
 
     Column(
         modifier = Modifier
@@ -135,7 +136,7 @@ fun CharacterDetail(character: CharacterEntity) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AsyncImage(
-            model = character.image,
+            model = character.character.image,
             contentDescription = "Character Image",
             modifier = Modifier
                 .size(200.dp)
@@ -145,7 +146,7 @@ fun CharacterDetail(character: CharacterEntity) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = character.name,
+            text = character.character.name,
             color = Color.White,
             style = titleTextStyle,
             modifier = Modifier
@@ -156,14 +157,14 @@ fun CharacterDetail(character: CharacterEntity) {
                 )
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         )
-        CharacterStatusItem("Status", character.status)
-        CharacterInfoItem("Species", character.species)
-        if (character.type.isNotEmpty()) {
-            CharacterInfoItem("Type", character.type)
+        CharacterStatusItem("Status", character.character.status)
+        CharacterInfoItem("Species", character.character.species)
+        if (character.character.type.isNotEmpty()) {
+            CharacterInfoItem("Type", character.character.type)
         }
-        CharacterInfoItem("Gender", character.gender)
-        CharacterInfoItem("Origin", character.origin_Id.toString())
-        CharacterInfoItem("Last known location", character.location_Id.toString())
+        CharacterInfoItem("Gender", character.character.gender)
+        CharacterInfoItem("Origin", character.origin)
+        CharacterInfoItem("Last known location", character.location)
     }
 }
 
@@ -173,6 +174,7 @@ fun CharacterStatusItem(label: String, value: String) {
     val statusColor = when (value.lowercase()) {
         "alive" -> Color.Green
         "dead" -> Color.Red
+        "unknown" -> Color.Yellow
         else -> Color.Gray
     }
     Row(

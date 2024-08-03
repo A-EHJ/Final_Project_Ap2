@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.rickmorty.data.local.entities.CharacterEntity
+import com.example.rickmorty.domain.models.Character
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,8 +156,9 @@ private fun CharacterListBody(
     }
 }
 
+
 @Composable
-fun CharacterItem(character: CharacterEntity, onCharacterClick: (Int) -> Unit) {
+fun CharacterItem(character: Character, onCharacterClick: (Int) -> Unit) {
     val titleTextStyle = androidx.compose.ui.text.TextStyle(
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold,
@@ -169,13 +170,13 @@ fun CharacterItem(character: CharacterEntity, onCharacterClick: (Int) -> Unit) {
         color = Color.White
     )
 
-    val borderColor = getStatusColor(character.status)
+    val borderColor = getStatusColor(character.character.status)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onCharacterClick(character.id) }
+            .clickable { onCharacterClick(character.character.id) }
             .clip(RoundedCornerShape(16.dp)) // Rounded corners
             .border(2.dp, borderColor, RoundedCornerShape(16.dp)) // Border based on status
             .background(
@@ -192,7 +193,7 @@ fun CharacterItem(character: CharacterEntity, onCharacterClick: (Int) -> Unit) {
             modifier = Modifier.padding(16.dp)
         ) {
             AsyncImage(
-                model = character.image,
+                model = character.character.image,
                 contentDescription = "Character Image",
                 modifier = Modifier
                     .size(80.dp) // Image size
@@ -202,7 +203,7 @@ fun CharacterItem(character: CharacterEntity, onCharacterClick: (Int) -> Unit) {
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
-                    text = "Name: ${character.name}",
+                    text = "Name: ${character.character.name}",
                     style = titleTextStyle
                 )
                 Row(
@@ -212,24 +213,24 @@ fun CharacterItem(character: CharacterEntity, onCharacterClick: (Int) -> Unit) {
                         modifier = Modifier
                             .size(10.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(getStatusColor(character.status))
+                            .background(getStatusColor(character.character.status))
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Status: ${character.status}",
+                        text = "Status: ${character.character.status}",
                         style = bodyTextStyle
                     )
                 }
                 Text(
-                    text = "Species: ${character.species}",
+                    text = "Species: ${character.character.species}",
                     style = bodyTextStyle
                 )
                 Text(
-                    text = "Last known Location: ${character.location_Id}",
+                    text = "Last known Location: ${character.location}",
                     style = bodyTextStyle
                 )
                 Text(
-                    text = "First seen: ${character.origin_Id}",
+                    text = "First seen: ${character.origin}",
                     style = bodyTextStyle
                 )
             }
