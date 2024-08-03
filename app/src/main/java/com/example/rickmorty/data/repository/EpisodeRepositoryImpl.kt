@@ -1,11 +1,13 @@
-package com.example.rickmorty.data.repository.Local
+package com.example.rickmorty.data.repository
 
 import com.example.rickmorty.data.local.dao.EpisodeDao
 import com.example.rickmorty.data.local.entities.EpisodeEntity
+import com.example.rickmorty.data.network.remote.Api.EpisodeApi
 import javax.inject.Inject
 
-class EpisodeLocalRepository @Inject constructor(
-    private val episodeDao: EpisodeDao
+class EpisodeRepositoryImpl @Inject constructor(
+    private val episodeDao: EpisodeDao,
+    private val episodeApi: EpisodeApi
 ) {
     fun getEpisodes() = episodeDao.getAllEpisodes()
     suspend fun getEpisode(id: Int) = episodeDao.getEpisodeById(id)

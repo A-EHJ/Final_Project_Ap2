@@ -1,10 +1,18 @@
-package com.example.rickmorty.data.repository.Local
+package com.example.rickmorty.data.repository
 
+import android.util.Log
 import com.example.rickmorty.data.local.dao.CharacterDao
 import com.example.rickmorty.data.local.entities.CharacterEntity
+import com.example.rickmorty.data.network.remote.Api.CharacterApi
+import com.example.rickmorty.data.network.remote.dto.CharacterDto
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class CharacterLocalRepository @Inject constructor(private val characterDao: CharacterDao) {
+class CharacterRepositoryImpl @Inject constructor(
+    private val characterDao: CharacterDao,
+    private val characterApi: CharacterApi
+) {
     fun getCharacters() = characterDao.getAllCharacters()
 
     suspend fun getCharacterById(id: Int) = characterDao.getCharacterById(id)
@@ -24,4 +32,17 @@ class CharacterLocalRepository @Inject constructor(private val characterDao: Cha
     suspend fun getMinCharacterId(): Int? = characterDao.getMinCharacterId()
 
     suspend fun getMaxCharacterId(): Int? = characterDao.getMaxCharacterId()
+
+
+    fun getAllCharacters(): Flow<Resource<List<CharacterDto>>> = flow {
+        emit(Resource.Loading())
+        try {
+            val users = characterApi.getAllCharacters()
+            Log.d("CharacterNetRepository", "getAllCharacters: $users")
+            emit(Resource.Success(users))
+        } catch (e: Exception) {
+            emit(Resource.Error(e.localizedMessage ?: "An unexpected error occurred"))
+        }
+    }
+
 }
