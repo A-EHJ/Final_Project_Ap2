@@ -36,7 +36,7 @@ interface CharacterDao {
         WHERE id = :characterId
     """
     )
-    suspend fun find(characterId: Int): CharacterEntity
+    fun find(characterId: Int): CharacterEntity
 
     @Update
     suspend fun update(character: CharacterEntity)
