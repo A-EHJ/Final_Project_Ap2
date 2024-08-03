@@ -1,6 +1,6 @@
-package com.example.rickmorty.data.Network.remote.Api
+package com.example.rickmorty.data.network.remote.Api
 
-import com.example.rickmorty.data.Network.remote.dto.CharacterEpisodeDto
+import com.example.rickmorty.data.network.remote.dto.CharacterEpisodeDto
 import retrofit2.http.GET
 
 interface CharacterEpisodeApi {

@@ -1,6 +1,6 @@
-package com.example.rickmorty.data.Network.remote.Api
+package com.example.rickmorty.data.network.remote.Api
 
-import com.example.rickmorty.data.Network.remote.dto.LocationDto
+import com.example.rickmorty.data.network.remote.dto.LocationDto
 import retrofit2.http.GET
 
 interface LocationApi {

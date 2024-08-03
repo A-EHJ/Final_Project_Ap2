@@ -1,4 +1,4 @@
-package com.example.rickmorty.data.Network.remote.dto
+package com.example.rickmorty.data.network.remote.dto
 
 data class EpisodeDto(
     val id: Int,
