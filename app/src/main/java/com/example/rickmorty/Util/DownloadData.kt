@@ -1,54 +1,89 @@
 package com.example.rickmorty.Util
 
-import android.annotation.SuppressLint
-import com.example.rickmorty.data.Network.remote.Api.CharacterApi
-import com.example.rickmorty.data.Network.remote.Api.CharacterEpisodeApi
-import com.example.rickmorty.data.Network.remote.Api.EpisodeApi
-import com.example.rickmorty.data.Network.remote.Api.LocationApi
-import com.example.rickmorty.data.Network.remote.Api.LocationResidentApi
 import com.example.rickmorty.data.local.entities.CharacterEntity
 import com.example.rickmorty.data.local.entities.CharacterEpisodeEntity
 import com.example.rickmorty.data.local.entities.EpisodeEntity
 import com.example.rickmorty.data.local.entities.LocationEntity
 import com.example.rickmorty.data.local.entities.LocationResidentEntity
-import com.example.rickmorty.data.repository.Local.CharacterEpisodeLocalRepository
-import com.example.rickmorty.data.repository.Local.CharacterLocalRepository
-import com.example.rickmorty.data.repository.Local.EpisodeLocalRepository
-import com.example.rickmorty.data.repository.Local.LocationLocalRepository
-import com.example.rickmorty.data.repository.Local.LocationResidentLocalRepository
+import com.example.rickmorty.data.network.remote.Api.CharacterApi
+import com.example.rickmorty.data.network.remote.Api.CharacterEpisodeApi
+import com.example.rickmorty.data.network.remote.Api.EpisodeApi
+import com.example.rickmorty.data.network.remote.Api.LocationApi
+import com.example.rickmorty.data.network.remote.Api.LocationResidentApi
+import com.example.rickmorty.data.repository.CharacterEpisodeRepositoryImpl
+import com.example.rickmorty.data.repository.CharacterRepositoryImpl
+import com.example.rickmorty.data.repository.EpisodeRepositoryImpl
+import com.example.rickmorty.data.repository.LocationRepositoryImpl
+import com.example.rickmorty.data.repository.LocationResidentRepositoryImpl
 import javax.inject.Inject
 
 class DownloadData @Inject constructor(
 
 
-    private val characterLocalRepository: CharacterLocalRepository,
-    private val locationLocalRepository: LocationLocalRepository,
-    private val episodeLocalRepository: EpisodeLocalRepository,
-    private val characterEpisodeLocalRepository: CharacterEpisodeLocalRepository,
-    private val locationResidentLocalRepository: LocationResidentLocalRepository,
+    private val characterRepositoryImpl: CharacterRepositoryImpl,
+    private val locationRepositoryImpl: LocationRepositoryImpl,
+    private val episodeRepositoryImpl: EpisodeRepositoryImpl,
+    private val characterEpisodeRepositoryImpl: CharacterEpisodeRepositoryImpl,
+    private val locationResidentRepositoryImpl: LocationResidentRepositoryImpl,
 
     private val characterApi: CharacterApi,
     private val locationApi: LocationApi,
     private val episodeApi: EpisodeApi,
     private val characterEpisodeApi: CharacterEpisodeApi,
-    private val locationResidentApi: LocationResidentApi
+    private val locationResidentApi: LocationResidentApi,
 ) {
-    @SuppressLint("NotConstructor")
-    suspend fun downloadData() {
 
+    suspend fun downloadCharacterData() {
+        try {
+            val characters = characterDaoToEntities()
+            characterRepositoryImpl.insertCharacters(characters)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
-        val characters = characterDaoToEntities()
-        val locations = locationDaoToEntities()
-        val episodes = episodeDaoToEntities()
-        val characterEpisodes = characterEpisodeDaoToEntities()
-        val locationResidents = locationResidentDaoToEntities()
+    suspend fun downloadLocationData() {
+        try {
+            val locations = locationDaoToEntities()
+            locationRepositoryImpl.insertLocations(locations)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
+    suspend fun downloadEpisodeData() {
+        try {
+            val episodes = episodeDaoToEntities()
+            episodeRepositoryImpl.insertEpisodes(episodes)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
-        characterLocalRepository.insertCharacters(characters)
-        locationLocalRepository.insertLocations(locations)
-        episodeLocalRepository.insertEpisodes(episodes)
-        characterEpisodeLocalRepository.insertCharacterEpisodes(characterEpisodes)
-        locationResidentLocalRepository.insertLocationResidents(locationResidents)
+    suspend fun downloadCharacterEpisodeData() {
+        try {
+            val characterEpisodes = characterEpisodeDaoToEntities()
+            characterEpisodeRepositoryImpl.insertCharacterEpisodes(characterEpisodes)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun downloadLocationResidentData() {
+        try {
+            val locationResidents = locationResidentDaoToEntities()
+            locationResidentRepositoryImpl.insertLocationResidents(locationResidents)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun downloadAllData() {
+        downloadCharacterData()
+        downloadLocationData()
+        downloadEpisodeData()
+        downloadCharacterEpisodeData()
+        downloadLocationResidentData()
     }
 
     private suspend fun locationResidentDaoToEntities(): List<LocationResidentEntity> {
