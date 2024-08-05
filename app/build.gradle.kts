@@ -86,6 +86,10 @@ dependencies {
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
     implementation(libs.androidx.material3.adaptive.navigation.suite)
     implementation(libs.androidx.drawerlayout)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.material3)
+    implementation(libs.androidx.material3.common)
+
 
     //Hilt Dependencies
     implementation(libs.hilt.android)
