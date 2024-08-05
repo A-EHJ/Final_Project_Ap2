@@ -57,6 +57,178 @@ interface CharacterDao {
     )
     suspend fun getCharactersLimited(startId: Int): List<CharacterEntity>
 
+    @Query(
+        """
+        SELECT * FROM character
+        WHERE id >= :startId
+        AND (name LIKE '%' || :text || '%')
+        AND (status in (:statusAlive, :statusDead, :statusUnknown))
+        AND (species in (:speciesHuman, :speciesCronenberg, :speciesDisease, :speciesPoopybutthole, :speciesAlien, :speciesUnknown, :speciesRobot, :speciesAnimal, :speciesMythologicalCreature, :speciesHumanoid))
+        AND (gender in (:genderFemale, :genderMale, :genderGenderless, :genderUnknown))
+        ORDER BY id ASC
+        LIMIT 10
+    """
+    )
+    suspend fun getCharactersLimitedFiltered(
+        startId: Int,
+        text: String,
+        statusAlive: String,
+        statusDead: String,
+        statusUnknown: String,
+        speciesHuman: String,
+        speciesCronenberg: String,
+        speciesDisease: String,
+        speciesPoopybutthole: String,
+        speciesAlien: String,
+        speciesUnknown: String,
+        speciesRobot: String,
+        speciesAnimal: String,
+        speciesMythologicalCreature: String,
+        speciesHumanoid: String,
+        genderFemale: String,
+        genderMale: String,
+        genderGenderless: String,
+        genderUnknown: String,
+    ): List<CharacterEntity>
+
+    @Query(
+        """
+    SELECT MIN(id) FROM (
+        SELECT id FROM character
+        WHERE id < :startId
+        AND (name LIKE '%' || :text || '%')
+        AND (status IN (:statusAlive, :statusDead, :statusUnknown))
+        AND (species IN (:speciesHuman, :speciesCronenberg, :speciesDisease, :speciesPoopybutthole, :speciesAlien, :speciesUnknown, :speciesRobot, :speciesAnimal, :speciesMythologicalCreature, :speciesHumanoid))
+        AND (gender IN (:genderFemale, :genderMale, :genderGenderless, :genderUnknown))
+        ORDER BY id DESC
+        LIMIT 10
+    )
+    """
+    )
+    suspend fun getMinIdLimitedFiltered(
+        startId: Int,
+        text: String,
+        statusAlive: String,
+        statusDead: String,
+        statusUnknown: String,
+        speciesHuman: String,
+        speciesCronenberg: String,
+        speciesDisease: String,
+        speciesPoopybutthole: String,
+        speciesAlien: String,
+        speciesUnknown: String,
+        speciesRobot: String,
+        speciesAnimal: String,
+        speciesMythologicalCreature: String,
+        speciesHumanoid: String,
+        genderFemale: String,
+        genderMale: String,
+        genderGenderless: String,
+        genderUnknown: String,
+    ): Int?
+
+
+    @Query(
+        """
+    SELECT MAX(id) FROM (
+        SELECT id FROM character
+        WHERE id >= :startId
+        AND (name LIKE '%' || :text || '%')
+        AND (status IN (:statusAlive, :statusDead, :statusUnknown))
+        AND (species IN (:speciesHuman, :speciesCronenberg, :speciesDisease, :speciesPoopybutthole, :speciesAlien, :speciesUnknown, :speciesRobot, :speciesAnimal, :speciesMythologicalCreature, :speciesHumanoid))
+        AND (gender IN (:genderFemale, :genderMale, :genderGenderless, :genderUnknown))
+        ORDER BY id ASC
+        LIMIT 10
+    )
+    """
+    )
+    suspend fun getMaxIdLimitedFiltered(
+        startId: Int,
+        text: String,
+        statusAlive: String,
+        statusDead: String,
+        statusUnknown: String,
+        speciesHuman: String,
+        speciesCronenberg: String,
+        speciesDisease: String,
+        speciesPoopybutthole: String,
+        speciesAlien: String,
+        speciesUnknown: String,
+        speciesRobot: String,
+        speciesAnimal: String,
+        speciesMythologicalCreature: String,
+        speciesHumanoid: String,
+        genderFemale: String,
+        genderMale: String,
+        genderGenderless: String,
+        genderUnknown: String,
+    ): Int?
+
+    @Query(
+        """
+        SELECT MIN(id) FROM character
+        WHERE (name LIKE '%' || :text || '%')
+        AND (status in (:statusAlive, :statusDead, :statusUnknown))
+        AND (species in (:speciesHuman, :speciesCronenberg, :speciesDisease, :speciesPoopybutthole, :speciesAlien, :speciesUnknown, :speciesRobot, :speciesAnimal, :speciesMythologicalCreature, :speciesHumanoid))
+        AND (gender in (:genderFemale, :genderMale, :genderGenderless, :genderUnknown))
+        ORDER BY id ASC
+    """
+    )
+    suspend fun getMinIdFiltered(
+        text: String,
+        statusAlive: String,
+        statusDead: String,
+        statusUnknown: String,
+        speciesHuman: String,
+        speciesCronenberg: String,
+        speciesDisease: String,
+        speciesPoopybutthole: String,
+        speciesAlien: String,
+        speciesUnknown: String,
+        speciesRobot: String,
+        speciesAnimal: String,
+        speciesMythologicalCreature: String,
+        speciesHumanoid: String,
+        genderFemale: String,
+        genderMale: String,
+        genderGenderless: String,
+        genderUnknown: String,
+    ): Int?
+
+
+    @Query(
+        """
+        SELECT MAX(id) FROM character
+        WHERE (name LIKE '%' || :text || '%')
+        AND (status in (:statusAlive, :statusDead, :statusUnknown))
+        AND (species in (:speciesHuman, :speciesCronenberg, :speciesDisease, :speciesPoopybutthole, :speciesAlien, :speciesUnknown, :speciesRobot, :speciesAnimal, :speciesMythologicalCreature, :speciesHumanoid))
+        AND (gender in (:genderFemale, :genderMale, :genderGenderless, :genderUnknown))
+        ORDER BY id ASC
+        LIMIT 10
+    """
+    )
+    suspend fun getMaxIdFiltered(
+        text: String,
+        statusAlive: String,
+        statusDead: String,
+        statusUnknown: String,
+        speciesHuman: String,
+        speciesCronenberg: String,
+        speciesDisease: String,
+        speciesPoopybutthole: String,
+        speciesAlien: String,
+        speciesUnknown: String,
+        speciesRobot: String,
+        speciesAnimal: String,
+        speciesMythologicalCreature: String,
+        speciesHumanoid: String,
+        genderFemale: String,
+        genderMale: String,
+        genderGenderless: String,
+        genderUnknown: String,
+    ): Int?
+
+
     @Query("SELECT MIN(id) FROM character")
     suspend fun getMinCharacterId(): Int?
 
