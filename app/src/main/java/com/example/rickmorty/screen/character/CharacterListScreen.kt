@@ -219,7 +219,7 @@ private fun CharacterListBody(
                 ) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "An error occurred",
+                        text = "No data available",
                         color = Color.Red,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
