@@ -10,9 +10,9 @@ import javax.inject.Inject
 
 class CharacterEpisodeRepositoryImpl @Inject constructor(
     private val characterEpisodeDao: CharacterEpisodeDao,
-    private val characterEpisodeApi: CharacterEpisodeApi
+    private val characterEpisodeApi: CharacterEpisodeApi,
 
-) {
+    ) {
     suspend fun insertCharacterEpisode(characterEpisode: CharacterEpisodeEntity) =
         characterEpisodeDao.save(characterEpisode)
 
@@ -31,4 +31,6 @@ class CharacterEpisodeRepositoryImpl @Inject constructor(
             emit(Resource.Error(e.localizedMessage ?: "An unexpected error occurred"))
         }
     }
+
+
 }

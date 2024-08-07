@@ -24,16 +24,28 @@ class CharacterListViewModel @Inject constructor(
     private var minId = 0
     private var maxId = 0
     private var currentId = 1
+    private var minCurrentId = 0
+    private var maxCurrentId = 0
 
 
     init {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true, isPreviousPageAvailable = false) }
             downloadData.downloadAllData()
             minId = characterRepository.getMinCharacterId() ?: 0
             maxId = characterRepository.getMaxCharacterId() ?: 0
+            maxCurrentId = getMaxIdLimitedFiltered(minId)
+            minCurrentId = getMinIdLimitedFiltered(minId)
             getCharactersLimited(minId)
-            
+        }
+    }
+
+    fun getCharacterLimited() {
+        _uiState.update { it.copy(isLoading = true) }
+        currentId = minId
+        viewModelScope.launch {
+            getCharactersLimitedFiltered(minId)
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
@@ -42,10 +54,16 @@ class CharacterListViewModel @Inject constructor(
             return
         }
 
+        _uiState.update {
+            it.copy(
+                isLoading = true, isPreviousPageAvailable = true, isNextPageAvailable = true
+            )
+        }
+
         if (isNextPage) {
-            currentId += 10
+            currentId = maxCurrentId + 1
         } else {
-            currentId -= 10
+            currentId = minCurrentId
         }
         if (currentId < minId) {
             currentId = minId
@@ -60,7 +78,12 @@ class CharacterListViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            getCharactersLimited(currentId)
+            maxCurrentId = getMaxIdLimitedFiltered(currentId)
+            minCurrentId = getMinIdLimitedFiltered(currentId)
+            minId = getMinIdFiltered()
+            maxId = getMaxIdFiltered()
+            getCharactersLimitedFiltered(currentId)
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
@@ -73,6 +96,295 @@ class CharacterListViewModel @Inject constructor(
             }
         }
     }
+
+    private suspend fun getCharactersLimitedFiltered(
+        startId: Int,
+    ) {
+        characterRepository.getCharactersLimitedFiltered(
+            startId = startId,
+            text = _uiState.value.text,
+            statusAlive = _uiState.value.statusAlive,
+            statusDead = _uiState.value.statusDead,
+            statusUnknown = _uiState.value.statusUnknown,
+            speciesHuman = _uiState.value.speciesHuman,
+            speciesCronenberg = _uiState.value.speciesCronenberg,
+            speciesDisease = _uiState.value.speciesDisease,
+            speciesPoopybutthole = _uiState.value.speciesPoopybutthole,
+            speciesAlien = _uiState.value.speciesAlien,
+            speciesUnknown = _uiState.value.speciesUnknown,
+            speciesRobot = _uiState.value.speciesRobot,
+            speciesAnimal = _uiState.value.speciesAnimal,
+            speciesMythologicalCreature = _uiState.value.speciesMythologicalCreature,
+            speciesHumanoid = _uiState.value.speciesHumanoid,
+            genderFemale = _uiState.value.genderFemale,
+            genderMale = _uiState.value.genderMale,
+            genderGenderless = _uiState.value.genderGenderless,
+            genderunknown = _uiState.value.genderunknown,
+        ).let { characters ->
+            _uiState.update {
+                it.copy(
+                    characters = characters, isLoading = false, errorMessage = ""
+                )
+            }
+        }
+    }
+
+    private suspend fun getMaxIdLimitedFiltered(
+        startId: Int,
+    ): Int {
+        var id = characterRepository.getMaxIdLimitedFiltered(
+            startId = startId,
+            text = _uiState.value.text,
+            statusAlive = _uiState.value.statusAlive,
+            statusDead = _uiState.value.statusDead,
+            statusUnknown = _uiState.value.statusUnknown,
+            speciesHuman = _uiState.value.speciesHuman,
+            speciesCronenberg = _uiState.value.speciesCronenberg,
+            speciesDisease = _uiState.value.speciesDisease,
+            speciesPoopybutthole = _uiState.value.speciesPoopybutthole,
+            speciesAlien = _uiState.value.speciesAlien,
+            speciesUnknown = _uiState.value.speciesUnknown,
+            speciesRobot = _uiState.value.speciesRobot,
+            speciesAnimal = _uiState.value.speciesAnimal,
+            speciesMythologicalCreature = _uiState.value.speciesMythologicalCreature,
+            speciesHumanoid = _uiState.value.speciesHumanoid,
+            genderFemale = _uiState.value.genderFemale,
+            genderMale = _uiState.value.genderMale,
+            genderGenderless = _uiState.value.genderGenderless,
+            genderunknown = _uiState.value.genderunknown,
+        )
+        if (id == null)
+            id = 0
+        return id
+    }
+
+
+    private suspend fun getMinIdLimitedFiltered(
+        startId: Int,
+    ): Int {
+        var id = characterRepository.getMinIdLimitedFiltered(
+            startId = startId,
+            text = _uiState.value.text,
+            statusAlive = _uiState.value.statusAlive,
+            statusDead = _uiState.value.statusDead,
+            statusUnknown = _uiState.value.statusUnknown,
+            speciesHuman = _uiState.value.speciesHuman,
+            speciesCronenberg = _uiState.value.speciesCronenberg,
+            speciesDisease = _uiState.value.speciesDisease,
+            speciesPoopybutthole = _uiState.value.speciesPoopybutthole,
+            speciesAlien = _uiState.value.speciesAlien,
+            speciesUnknown = _uiState.value.speciesUnknown,
+            speciesRobot = _uiState.value.speciesRobot,
+            speciesAnimal = _uiState.value.speciesAnimal,
+            speciesMythologicalCreature = _uiState.value.speciesMythologicalCreature,
+            speciesHumanoid = _uiState.value.speciesHumanoid,
+            genderFemale = _uiState.value.genderFemale,
+            genderMale = _uiState.value.genderMale,
+            genderGenderless = _uiState.value.genderGenderless,
+            genderunknown = _uiState.value.genderunknown,
+        )
+        if (id == null)
+            id = 0
+        return id
+    }
+
+    private suspend fun getMaxIdFiltered(
+    ): Int {
+        var id = characterRepository.getMaxIdFiltered(
+            text = _uiState.value.text,
+            statusAlive = _uiState.value.statusAlive,
+            statusDead = _uiState.value.statusDead,
+            statusUnknown = _uiState.value.statusUnknown,
+            speciesHuman = _uiState.value.speciesHuman,
+            speciesCronenberg = _uiState.value.speciesCronenberg,
+            speciesDisease = _uiState.value.speciesDisease,
+            speciesPoopybutthole = _uiState.value.speciesPoopybutthole,
+            speciesAlien = _uiState.value.speciesAlien,
+            speciesUnknown = _uiState.value.speciesUnknown,
+            speciesRobot = _uiState.value.speciesRobot,
+            speciesAnimal = _uiState.value.speciesAnimal,
+            speciesMythologicalCreature = _uiState.value.speciesMythologicalCreature,
+            speciesHumanoid = _uiState.value.speciesHumanoid,
+            genderFemale = _uiState.value.genderFemale,
+            genderMale = _uiState.value.genderMale,
+            genderGenderless = _uiState.value.genderGenderless,
+            genderunknown = _uiState.value.genderunknown,
+        )
+        if (id == null)
+            id = 0
+        return id
+    }
+
+
+    private suspend fun getMinIdFiltered(
+    ): Int {
+        var id = characterRepository.getMinIdFiltered(
+            text = _uiState.value.text,
+            statusAlive = _uiState.value.statusAlive,
+            statusDead = _uiState.value.statusDead,
+            statusUnknown = _uiState.value.statusUnknown,
+            speciesHuman = _uiState.value.speciesHuman,
+            speciesCronenberg = _uiState.value.speciesCronenberg,
+            speciesDisease = _uiState.value.speciesDisease,
+            speciesPoopybutthole = _uiState.value.speciesPoopybutthole,
+            speciesAlien = _uiState.value.speciesAlien,
+            speciesUnknown = _uiState.value.speciesUnknown,
+            speciesRobot = _uiState.value.speciesRobot,
+            speciesAnimal = _uiState.value.speciesAnimal,
+            speciesMythologicalCreature = _uiState.value.speciesMythologicalCreature,
+            speciesHumanoid = _uiState.value.speciesHumanoid,
+            genderFemale = _uiState.value.genderFemale,
+            genderMale = _uiState.value.genderMale,
+            genderGenderless = _uiState.value.genderGenderless,
+            genderunknown = _uiState.value.genderunknown,
+        )
+        if (id == null)
+            id = 0
+        return id
+    }
+
+
+    fun onSearchTextChanged(text: String) {
+        _uiState.update { it.copy(text = text) }
+    }
+
+    fun onStatusAliveChecked() {
+        _uiState.update { it.copy(statusAlive = !_uiState.value.statusAlive) }
+    }
+
+    fun onStatusDeadChecked() {
+        _uiState.update { it.copy(statusDead = !_uiState.value.statusDead) }
+    }
+
+    fun onStatusUnknownChecked() {
+        _uiState.update { it.copy(statusUnknown = !_uiState.value.statusUnknown) }
+    }
+
+    fun onSpeciesHumanChecked() {
+        _uiState.update { it.copy(speciesHuman = !_uiState.value.speciesHuman) }
+    }
+
+    fun onSpeciesCronenbergChecked() {
+        _uiState.update { it.copy(speciesCronenberg = !_uiState.value.speciesCronenberg) }
+    }
+
+    fun onSpeciesDiseaseChecked() {
+        _uiState.update { it.copy(speciesDisease = !_uiState.value.speciesDisease) }
+    }
+
+    fun onSpeciesPoopybuttholeChecked() {
+        _uiState.update { it.copy(speciesPoopybutthole = !_uiState.value.speciesPoopybutthole) }
+    }
+
+    fun onSpeciesAlienChecked() {
+        _uiState.update { it.copy(speciesAlien = !_uiState.value.speciesAlien) }
+    }
+
+    fun onSpeciesUnknownChecked() {
+        _uiState.update { it.copy(speciesUnknown = !_uiState.value.speciesUnknown) }
+    }
+
+    fun onSpeciesRobotChecked() {
+        _uiState.update { it.copy(speciesRobot = !_uiState.value.speciesRobot) }
+    }
+
+    fun onSpeciesAnimalChecked() {
+        _uiState.update { it.copy(speciesAnimal = !_uiState.value.speciesAnimal) }
+    }
+
+    fun onSpeciesMythologicalCreatureChecked() {
+        _uiState.update { it.copy(speciesMythologicalCreature = !_uiState.value.speciesMythologicalCreature) }
+    }
+
+    fun onSpeciesHumanoidChecked() {
+        _uiState.update { it.copy(speciesHumanoid = !_uiState.value.speciesHumanoid) }
+    }
+
+    fun onGenderFemaleChecked() {
+        _uiState.update { it.copy(genderFemale = !_uiState.value.genderFemale) }
+    }
+
+    fun onGenderMaleChecked() {
+        _uiState.update { it.copy(genderMale = !_uiState.value.genderMale) }
+    }
+
+    fun onGenderGenderlessChecked() {
+        _uiState.update { it.copy(genderGenderless = !_uiState.value.genderGenderless) }
+    }
+
+    fun onGenderUnknownChecked() {
+        _uiState.update { it.copy(genderunknown = !_uiState.value.genderunknown) }
+    }
+
+    fun resetFilters() {
+        _uiState.update {
+            it.copy(
+                text = "",
+                statusAlive = true,
+                statusDead = true,
+                statusUnknown = true,
+                speciesHuman = true,
+                speciesCronenberg = true,
+                speciesDisease = true,
+                speciesPoopybutthole = true,
+                speciesAlien = true,
+                speciesUnknown = true,
+                speciesRobot = true,
+                speciesAnimal = true,
+                speciesMythologicalCreature = true,
+                speciesHumanoid = true,
+                genderFemale = true,
+                genderMale = true,
+                genderGenderless = true,
+                genderunknown = true,
+            )
+        }
+    }
+
+    fun resetStatusFilters() {
+        val bool =
+            (_uiState.value.statusAlive || _uiState.value.statusDead || _uiState.value.statusUnknown)
+        _uiState.update {
+            it.copy(
+                statusAlive = bool,
+                statusDead = bool,
+                statusUnknown = bool,
+            )
+        }
+    }
+
+    fun resetSpeciesFilters() {
+        val bool =
+            (_uiState.value.speciesHuman || _uiState.value.speciesCronenberg || _uiState.value.speciesDisease || _uiState.value.speciesPoopybutthole || _uiState.value.speciesAlien || _uiState.value.speciesUnknown || _uiState.value.speciesRobot || _uiState.value.speciesAnimal || _uiState.value.speciesMythologicalCreature || _uiState.value.speciesHumanoid)
+        _uiState.update {
+            it.copy(
+                speciesHuman = bool,
+                speciesCronenberg = bool,
+                speciesDisease = bool,
+                speciesPoopybutthole = bool,
+                speciesAlien = bool,
+                speciesUnknown = bool,
+                speciesRobot = bool,
+                speciesAnimal = bool,
+                speciesMythologicalCreature = bool,
+                speciesHumanoid = bool,
+            )
+        }
+    }
+
+    fun resetGenderFilters() {
+        val bool =
+            (_uiState.value.genderFemale || _uiState.value.genderMale || _uiState.value.genderGenderless || _uiState.value.genderunknown)
+        _uiState.update {
+            it.copy(
+                genderFemale = bool,
+                genderMale = bool,
+                genderGenderless = bool,
+                genderunknown = bool,
+            )
+        }
+    }
+
 }
 
 data class CharactersUIState(
@@ -81,4 +393,22 @@ data class CharactersUIState(
     val isLoading: Boolean = false,
     val characters: List<Character> = emptyList(),
     val errorMessage: String = "",
+    val text: String = "",
+    val statusAlive: Boolean = true,
+    val statusDead: Boolean = true,
+    val statusUnknown: Boolean = true,
+    val speciesHuman: Boolean = true,
+    val speciesCronenberg: Boolean = true,
+    val speciesDisease: Boolean = true,
+    val speciesPoopybutthole: Boolean = true,
+    val speciesAlien: Boolean = true,
+    val speciesUnknown: Boolean = true,
+    val speciesRobot: Boolean = true,
+    val speciesAnimal: Boolean = true,
+    val speciesMythologicalCreature: Boolean = true,
+    val speciesHumanoid: Boolean = true,
+    val genderFemale: Boolean = true,
+    val genderMale: Boolean = true,
+    val genderGenderless: Boolean = true,
+    val genderunknown: Boolean = true,
 )
