@@ -9,4 +9,7 @@ sealed class Screen {
 
     @Serializable
     data class CharacterBody(val characterId: Int) : Screen()
+
+    @Serializable
+    object LocationList : Screen()
 }

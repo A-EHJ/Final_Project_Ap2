@@ -4,13 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.example.rickmorty.Screen.Component.NavigationDrawer
 import com.example.rickmorty.navigation.NavHostApp
 import com.example.rickmorty.ui.theme.RickMortyTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,10 +20,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
             RickMortyTheme {
-                Column(modifier = Modifier.background(Color.Black)) {
-                    val navController = rememberNavController()
-                    NavHostApp(navHostController = navController)
+                val navController = rememberNavController()
+                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+                NavigationDrawer(navController = navController, drawerState = drawerState) {
+                    NavHostApp(navHostController = navController, drawerState = drawerState)
                 }
             }
         }
