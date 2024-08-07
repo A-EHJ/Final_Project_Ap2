@@ -148,12 +148,13 @@ class DownloadData @Inject constructor(
 
     suspend fun checkVersion(): Boolean {
         var versionLocal: Int? = null
+        var versionApi: Int? = null
         try {
             versionLocal = configurationRepositoryImpl.getVersionFromDb() ?: 0
+            versionApi = configurationRepositoryImpl.getVersionFromApi()
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        var versionApi: Int? = configurationRepositoryImpl.getVersionFromApi()
 
         return versionApi == versionLocal
     }
