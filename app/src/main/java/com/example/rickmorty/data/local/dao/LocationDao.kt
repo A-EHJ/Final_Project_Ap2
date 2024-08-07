@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import androidx.room.Upsert
+import com.example.rickmorty.Util.MinMaxIdResult
 import com.example.rickmorty.data.local.entities.LocationEntity
 
 @Dao
@@ -19,12 +20,53 @@ interface LocationDao {
     @Query(
         """
         SELECT * FROM location
-        WHERE name LIKE '%' || :query || '%'
-        OR type LIKE '%' || :query || '%'
-        OR dimension LIKE '%' || :query || '%'
+        WHERE id >= :startId
+        ORDER BY id ASC
+        LIMIT 10
     """
     )
-    suspend fun searchLocations(query: String): List<LocationEntity>
+    suspend fun getLocationsLimited(startId: Int): List<LocationEntity>
+
+    @Query(
+        """
+    SELECT MIN(id) FROM (
+        SELECT id FROM location
+        WHERE id < :startId
+        ORDER BY id DESC
+        LIMIT 10
+    )
+    """
+    )
+    suspend fun getMinIdLimitedFiltered(
+        startId: Int,
+    ): Int?
+
+
+    @Query(
+        """
+    SELECT MAX(id) FROM (
+        SELECT id FROM character
+        WHERE id >= :startId
+        ORDER BY id ASC
+        LIMIT 10
+    )
+    """
+    )
+    suspend fun getMaxIdLimitedFiltered(
+        startId: Int,
+    ): Int?
+
+
+    @Query(
+        """
+    SELECT MIN(id) AS minId, MAX(id) AS maxId FROM (
+        SELECT id FROM character
+        ORDER BY id ASC
+    )
+    """
+    )
+    suspend fun getMinMaxIdFiltered(
+    ): MinMaxIdResult?
 
     @Query(
         """

@@ -22,11 +22,11 @@ interface LocationResidentDao {
 
     @Query(
         """
-        SELECT * FROM location_resident
+        SELECT CharacterId FROM location_resident
         WHERE locationid = :locationId
     """
     )
-    suspend fun findLocation(locationId: Int): List<LocationResidentEntity>
+    suspend fun findLocation(locationId: Int): List<Int>
 
     @Query(
         """
