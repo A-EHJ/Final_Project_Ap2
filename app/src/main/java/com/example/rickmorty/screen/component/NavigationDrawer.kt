@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Component
+package com.example.rickmorty.screen.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height

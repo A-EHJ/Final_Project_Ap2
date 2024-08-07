@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Location
+package com.example.rickmorty.screen.location
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

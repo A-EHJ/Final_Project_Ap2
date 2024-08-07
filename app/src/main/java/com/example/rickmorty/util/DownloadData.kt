@@ -1,4 +1,4 @@
-package com.example.rickmorty.Util
+package com.example.rickmorty.util
 
 import com.example.rickmorty.data.local.entities.CharacterEntity
 import com.example.rickmorty.data.local.entities.CharacterEpisodeEntity

@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Character
+package com.example.rickmorty.screen.character
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color

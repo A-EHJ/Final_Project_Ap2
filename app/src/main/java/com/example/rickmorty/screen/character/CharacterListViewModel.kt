@@ -1,11 +1,11 @@
-package com.example.rickmorty.Screen.Character
+package com.example.rickmorty.screen.character
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.rickmorty.Util.DownloadData
-import com.example.rickmorty.Util.MinMaxIdResult
 import com.example.rickmorty.domain.models.Character
 import com.example.rickmorty.domain.repository.CharacterRepository
+import com.example.rickmorty.util.DownloadData
+import com.example.rickmorty.util.MinMaxIdResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

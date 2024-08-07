@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Character
+package com.example.rickmorty.screen.character
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,8 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.rickmorty.Screen.Component.CustomFilterChip
 import com.example.rickmorty.domain.models.Character
+import com.example.rickmorty.screen.component.CustomFilterChip
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

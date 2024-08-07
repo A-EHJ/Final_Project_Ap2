@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Character
+package com.example.rickmorty.screen.character
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

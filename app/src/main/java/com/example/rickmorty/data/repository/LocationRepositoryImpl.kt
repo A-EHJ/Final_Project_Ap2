@@ -1,14 +1,10 @@
 package com.example.rickmorty.data.repository
 
-import android.util.Log
-import com.example.rickmorty.Util.MinMaxIdResult
-import com.example.rickmorty.Util.Resource
 import com.example.rickmorty.data.local.dao.LocationDao
 import com.example.rickmorty.data.local.entities.LocationEntity
 import com.example.rickmorty.data.network.remote.Api.LocationApi
 import com.example.rickmorty.data.network.remote.dto.LocationDto
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import com.example.rickmorty.util.MinMaxIdResult
 import javax.inject.Inject
 
 class LocationRepositoryImpl @Inject constructor(

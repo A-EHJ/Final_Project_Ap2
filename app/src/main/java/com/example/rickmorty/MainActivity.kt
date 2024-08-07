@@ -9,8 +9,8 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import com.example.rickmorty.Screen.Component.NavigationDrawer
 import com.example.rickmorty.navigation.NavHostApp
+import com.example.rickmorty.screen.component.NavigationDrawer
 import com.example.rickmorty.ui.theme.RickMortyTheme
 import dagger.hilt.android.AndroidEntryPoint
 

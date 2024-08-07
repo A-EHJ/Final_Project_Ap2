@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Location
+package com.example.rickmorty.screen.location
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,7 +25,6 @@ class LocationListViewModel @Inject constructor(
     private var minCurrentId = 0
     private var maxCurrentId = 0
 
-
     init {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, isPreviousPageAvailable = false) }
@@ -36,15 +35,6 @@ class LocationListViewModel @Inject constructor(
             maxCurrentId = minMaxCurrentId.maxId ?: 0
             minCurrentId = minMaxCurrentId.minId ?: 0
             getLocationsLimited(minId)
-        }
-    }
-
-    fun getLocationLimited() {
-        _uiState.update { it.copy(isLoading = true) }
-        currentId = minId
-        viewModelScope.launch {
-            locationRepository.getLocationsLimited(minId)
-            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
@@ -97,7 +87,6 @@ class LocationListViewModel @Inject constructor(
             }
         }
     }
-
 }
 
 data class LocationUIState(

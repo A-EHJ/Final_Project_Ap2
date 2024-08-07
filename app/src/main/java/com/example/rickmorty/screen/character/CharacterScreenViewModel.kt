@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Character
+package com.example.rickmorty.screen.character
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,17 +13,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CharacterBodyViewModel @Inject constructor(
-    val characterRepository: CharacterRepository,
+    private val characterRepository: CharacterRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(UIState())
-    val uiState = _uiState.asStateFlow()
+    private val _characterBodyState = MutableStateFlow(CharacterBodyState())
+    val uiState = _characterBodyState.asStateFlow()
 
     fun getCharacter(characterId: Int) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _characterBodyState.value = _characterBodyState.value.copy(isLoading = true)
             val character = characterRepository.getCharacterById(characterId)
-            _uiState.value = _uiState.value.copy(
+            _characterBodyState.value = _characterBodyState.value.copy(
                 isLoading = false,
                 character = character,
             )
@@ -31,7 +31,7 @@ class CharacterBodyViewModel @Inject constructor(
     }
 }
 
-data class UIState(
+data class CharacterBodyState(
     val isLoading: Boolean = false,
     val character: Character = Character(),
     val errorMessage: String = "",
