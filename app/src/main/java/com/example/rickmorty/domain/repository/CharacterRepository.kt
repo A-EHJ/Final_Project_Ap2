@@ -1,5 +1,6 @@
 package com.example.rickmorty.domain.repository
 
+import com.example.rickmorty.Util.MinMaxIdResult
 import com.example.rickmorty.data.local.entities.CharacterEntity
 import com.example.rickmorty.data.repository.CharacterRepositoryImpl
 import com.example.rickmorty.data.repository.LocationRepositoryImpl
@@ -82,7 +83,7 @@ class CharacterRepository @Inject constructor(
         return newCharacter
     }
 
-    suspend fun getMinIdLimitedFiltered(
+    suspend fun getMinMaxIdLimitedFiltered(
         startId: Int,
         text: String,
         statusAlive: Boolean,
@@ -102,8 +103,8 @@ class CharacterRepository @Inject constructor(
         genderMale: Boolean,
         genderGenderless: Boolean,
         genderunknown: Boolean,
-    ): Int? {
-        val minId = characterRepositoryImpl.getMinIdLimitedFiltered(
+    ): MinMaxIdResult {
+        val minMaxId = characterRepositoryImpl.getMinMaxIdLimitedFiltered(
             startId,
             text,
             statusAlive,
@@ -124,11 +125,10 @@ class CharacterRepository @Inject constructor(
             genderGenderless,
             genderunknown
         )
-        return minId
+        return minMaxId
     }
 
-    suspend fun getMaxIdLimitedFiltered(
-        startId: Int,
+    suspend fun getMinMaxIdFiltered(
         text: String,
         statusAlive: Boolean,
         statusDead: Boolean,
@@ -147,9 +147,8 @@ class CharacterRepository @Inject constructor(
         genderMale: Boolean,
         genderGenderless: Boolean,
         genderunknown: Boolean,
-    ): Int? {
-        val maxId = characterRepositoryImpl.getMaIdLimitedFiltered(
-            startId,
+    ): MinMaxIdResult? {
+        val minMaxId = characterRepositoryImpl.getMinMaxIdFiltered(
             text,
             statusAlive,
             statusDead,
@@ -169,95 +168,8 @@ class CharacterRepository @Inject constructor(
             genderGenderless,
             genderunknown
         )
-        return maxId
+        return minMaxId
     }
-
-    suspend fun getMinIdFiltered(
-        text: String,
-        statusAlive: Boolean,
-        statusDead: Boolean,
-        statusUnknown: Boolean,
-        speciesHuman: Boolean,
-        speciesCronenberg: Boolean,
-        speciesDisease: Boolean,
-        speciesPoopybutthole: Boolean,
-        speciesAlien: Boolean,
-        speciesUnknown: Boolean,
-        speciesRobot: Boolean,
-        speciesAnimal: Boolean,
-        speciesMythologicalCreature: Boolean,
-        speciesHumanoid: Boolean,
-        genderFemale: Boolean,
-        genderMale: Boolean,
-        genderGenderless: Boolean,
-        genderunknown: Boolean,
-    ): Int? {
-        val minId = characterRepositoryImpl.getMinIdFiltered(
-            text,
-            statusAlive,
-            statusDead,
-            statusUnknown,
-            speciesHuman,
-            speciesCronenberg,
-            speciesDisease,
-            speciesPoopybutthole,
-            speciesAlien,
-            speciesUnknown,
-            speciesRobot,
-            speciesAnimal,
-            speciesMythologicalCreature,
-            speciesHumanoid,
-            genderFemale,
-            genderMale,
-            genderGenderless,
-            genderunknown
-        )
-        return minId
-    }
-
-    suspend fun getMaxIdFiltered(
-        text: String,
-        statusAlive: Boolean,
-        statusDead: Boolean,
-        statusUnknown: Boolean,
-        speciesHuman: Boolean,
-        speciesCronenberg: Boolean,
-        speciesDisease: Boolean,
-        speciesPoopybutthole: Boolean,
-        speciesAlien: Boolean,
-        speciesUnknown: Boolean,
-        speciesRobot: Boolean,
-        speciesAnimal: Boolean,
-        speciesMythologicalCreature: Boolean,
-        speciesHumanoid: Boolean,
-        genderFemale: Boolean,
-        genderMale: Boolean,
-        genderGenderless: Boolean,
-        genderunknown: Boolean,
-    ): Int? {
-        val maxId = characterRepositoryImpl.getMaIdFiltered(
-            text,
-            statusAlive,
-            statusDead,
-            statusUnknown,
-            speciesHuman,
-            speciesCronenberg,
-            speciesDisease,
-            speciesPoopybutthole,
-            speciesAlien,
-            speciesUnknown,
-            speciesRobot,
-            speciesAnimal,
-            speciesMythologicalCreature,
-            speciesHumanoid,
-            genderFemale,
-            genderMale,
-            genderGenderless,
-            genderunknown
-        )
-        return maxId
-    }
-
 
     suspend fun getCharacterById(id: Int): Character {
         val character = characterRepositoryImpl.getCharacterById(id)

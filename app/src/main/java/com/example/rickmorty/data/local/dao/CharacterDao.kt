@@ -6,10 +6,12 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import androidx.room.Upsert
+import com.example.rickmorty.Util.MinMaxIdResult
 import com.example.rickmorty.data.local.entities.CharacterEntity
 
 @Dao
 interface CharacterDao {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(character: CharacterEntity)
 
@@ -18,17 +20,6 @@ interface CharacterDao {
 
     @Query("SELECT * FROM character")
     fun getAllCharacters(): List<CharacterEntity>
-
-    @Query(
-        """
-        SELECT * FROM character
-        WHERE name LIKE '%' || :query || '%'
-        OR status LIKE '%' || :query || '%'
-        OR species LIKE '%' || :query || '%'
-        OR type LIKE '%' || :query || '%'
-        """
-    )
-    suspend fun searchCharacters(query: String): List<CharacterEntity>
 
     @Query(
         """
@@ -164,17 +155,20 @@ interface CharacterDao {
         genderUnknown: String,
     ): Int?
 
+
     @Query(
         """
-        SELECT MIN(id) FROM character
+    SELECT MIN(id) AS minId, MAX(id) AS maxId FROM (
+        SELECT id FROM character
         WHERE (name LIKE '%' || :text || '%')
-        AND (status in (:statusAlive, :statusDead, :statusUnknown))
-        AND (species in (:speciesHuman, :speciesCronenberg, :speciesDisease, :speciesPoopybutthole, :speciesAlien, :speciesUnknown, :speciesRobot, :speciesAnimal, :speciesMythologicalCreature, :speciesHumanoid))
-        AND (gender in (:genderFemale, :genderMale, :genderGenderless, :genderUnknown))
+        AND (status IN (:statusAlive, :statusDead, :statusUnknown))
+        AND (species IN (:speciesHuman, :speciesCronenberg, :speciesDisease, :speciesPoopybutthole, :speciesAlien, :speciesUnknown, :speciesRobot, :speciesAnimal, :speciesMythologicalCreature, :speciesHumanoid))
+        AND (gender IN (:genderFemale, :genderMale, :genderGenderless, :genderUnknown))
         ORDER BY id ASC
+    )
     """
     )
-    suspend fun getMinIdFiltered(
+    suspend fun getMinMaxIdFiltered(
         text: String,
         statusAlive: String,
         statusDead: String,
@@ -193,40 +187,7 @@ interface CharacterDao {
         genderMale: String,
         genderGenderless: String,
         genderUnknown: String,
-    ): Int?
-
-
-    @Query(
-        """
-        SELECT MAX(id) FROM character
-        WHERE (name LIKE '%' || :text || '%')
-        AND (status in (:statusAlive, :statusDead, :statusUnknown))
-        AND (species in (:speciesHuman, :speciesCronenberg, :speciesDisease, :speciesPoopybutthole, :speciesAlien, :speciesUnknown, :speciesRobot, :speciesAnimal, :speciesMythologicalCreature, :speciesHumanoid))
-        AND (gender in (:genderFemale, :genderMale, :genderGenderless, :genderUnknown))
-        ORDER BY id ASC
-        LIMIT 10
-    """
-    )
-    suspend fun getMaxIdFiltered(
-        text: String,
-        statusAlive: String,
-        statusDead: String,
-        statusUnknown: String,
-        speciesHuman: String,
-        speciesCronenberg: String,
-        speciesDisease: String,
-        speciesPoopybutthole: String,
-        speciesAlien: String,
-        speciesUnknown: String,
-        speciesRobot: String,
-        speciesAnimal: String,
-        speciesMythologicalCreature: String,
-        speciesHumanoid: String,
-        genderFemale: String,
-        genderMale: String,
-        genderGenderless: String,
-        genderUnknown: String,
-    ): Int?
+    ): MinMaxIdResult?
 
 
     @Query("SELECT MIN(id) FROM character")

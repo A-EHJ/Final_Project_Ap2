@@ -5,13 +5,9 @@ import com.example.rickmorty.data.local.entities.CharacterEpisodeEntity
 import com.example.rickmorty.data.local.entities.EpisodeEntity
 import com.example.rickmorty.data.local.entities.LocationEntity
 import com.example.rickmorty.data.local.entities.LocationResidentEntity
-import com.example.rickmorty.data.network.remote.Api.CharacterApi
-import com.example.rickmorty.data.network.remote.Api.CharacterEpisodeApi
-import com.example.rickmorty.data.network.remote.Api.EpisodeApi
-import com.example.rickmorty.data.network.remote.Api.LocationApi
-import com.example.rickmorty.data.network.remote.Api.LocationResidentApi
 import com.example.rickmorty.data.repository.CharacterEpisodeRepositoryImpl
 import com.example.rickmorty.data.repository.CharacterRepositoryImpl
+import com.example.rickmorty.data.repository.ConfigurationRepositoryImpl
 import com.example.rickmorty.data.repository.EpisodeRepositoryImpl
 import com.example.rickmorty.data.repository.LocationRepositoryImpl
 import com.example.rickmorty.data.repository.LocationResidentRepositoryImpl
@@ -25,12 +21,7 @@ class DownloadData @Inject constructor(
     private val episodeRepositoryImpl: EpisodeRepositoryImpl,
     private val characterEpisodeRepositoryImpl: CharacterEpisodeRepositoryImpl,
     private val locationResidentRepositoryImpl: LocationResidentRepositoryImpl,
-
-    private val characterApi: CharacterApi,
-    private val locationApi: LocationApi,
-    private val episodeApi: EpisodeApi,
-    private val characterEpisodeApi: CharacterEpisodeApi,
-    private val locationResidentApi: LocationResidentApi,
+    private val configurationRepositoryImpl: ConfigurationRepositoryImpl,
 ) {
 
     suspend fun downloadCharacterData() {
@@ -78,34 +69,50 @@ class DownloadData @Inject constructor(
         }
     }
 
+    suspend fun downloadConfigurationData() {
+        try {
+            val version = configurationRepositoryImpl.getVersionFromApi()
+            configurationRepositoryImpl.upsertVersion(version)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     suspend fun downloadAllData() {
+        if (checkVersion()) {
+            return
+        }
         downloadCharacterData()
         downloadLocationData()
         downloadEpisodeData()
         downloadCharacterEpisodeData()
         downloadLocationResidentData()
+        downloadConfigurationData()
     }
 
     private suspend fun locationResidentDaoToEntities(): List<LocationResidentEntity> {
-        val locationResidents = locationResidentApi.getAllLocationResidents().map { dto ->
-            LocationResidentEntity(
-                id = 0, locationId = dto.locationid, characterId = dto.characterid
-            )
-        }
+        val locationResidents =
+            locationResidentRepositoryImpl.getAllLocationResidents().map { dto ->
+                LocationResidentEntity(
+                    id = 0, locationId = dto.locationid, characterId = dto.characterid
+                )
+            }
         return locationResidents
     }
 
+
     private suspend fun characterEpisodeDaoToEntities(): List<CharacterEpisodeEntity> {
-        val characterEpisodes = characterEpisodeApi.getAllCharacterEpisodes().map { dto ->
-            CharacterEpisodeEntity(
-                id = 0, characterId = dto.character_Id, episodeId = dto.episode_Id
-            )
-        }
+        val characterEpisodes =
+            characterEpisodeRepositoryImpl.getAllCharacterEpisodes().map { dto ->
+                CharacterEpisodeEntity(
+                    id = 0, characterId = dto.character_Id, episodeId = dto.episode_Id
+                )
+            }
         return characterEpisodes
     }
 
     private suspend fun episodeDaoToEntities(): List<EpisodeEntity> {
-        val episodes = episodeApi.getAllEpisodes().map { dto ->
+        val episodes = episodeRepositoryImpl.getAllEpisodes().map { dto ->
             EpisodeEntity(
                 id = dto.id, name = dto.name, episode = dto.episode, airDate = dto.air_Date
             )
@@ -114,7 +121,7 @@ class DownloadData @Inject constructor(
     }
 
     private suspend fun locationDaoToEntities(): List<LocationEntity> {
-        val locations = locationApi.getAllLocations().map { dto ->
+        val locations = locationRepositoryImpl.getAllLocations().map { dto ->
             LocationEntity(
                 id = dto.id, name = dto.name, type = dto.type, dimension = dto.dimension
             )
@@ -123,7 +130,7 @@ class DownloadData @Inject constructor(
     }
 
     private suspend fun characterDaoToEntities(): List<CharacterEntity> {
-        val characters = characterApi.getAllCharacters().map { dto ->
+        val characters = characterRepositoryImpl.getAllCharacters().map { dto ->
             CharacterEntity(
                 id = dto.id,
                 name = dto.name,
@@ -137,5 +144,17 @@ class DownloadData @Inject constructor(
             )
         }
         return characters
+    }
+
+    suspend fun checkVersion(): Boolean {
+        var versionLocal: Int? = null
+        try {
+            versionLocal = configurationRepositoryImpl.getVersionFromDb() ?: 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        var versionApi: Int? = configurationRepositoryImpl.getVersionFromApi()
+
+        return versionApi == versionLocal
     }
 }

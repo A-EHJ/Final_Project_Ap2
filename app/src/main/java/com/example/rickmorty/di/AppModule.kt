@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.room.Room
 import com.example.rickmorty.data.local.dao.CharacterDao
 import com.example.rickmorty.data.local.dao.CharacterEpisodeDao
+import com.example.rickmorty.data.local.dao.ConfigurationDao
 import com.example.rickmorty.data.local.dao.EpisodeDao
 import com.example.rickmorty.data.local.dao.LocationDao
 import com.example.rickmorty.data.local.dao.LocationResidentDao
 import com.example.rickmorty.data.local.database.RMDb
 import com.example.rickmorty.data.network.remote.Api.CharacterApi
 import com.example.rickmorty.data.network.remote.Api.CharacterEpisodeApi
+import com.example.rickmorty.data.network.remote.Api.ConfigurationApi
 import com.example.rickmorty.data.network.remote.Api.EpisodeApi
 import com.example.rickmorty.data.network.remote.Api.LocationApi
 import com.example.rickmorty.data.network.remote.Api.LocationResidentApi
@@ -67,6 +69,12 @@ object AppModule {
     @Provides
     fun provideLocationResidentDao(db: RMDb): LocationResidentDao {
         return db.locationResidentDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideConfigurationDao(db: RMDb): ConfigurationDao {
+        return db.configurationDao()
     }
 
 
@@ -130,6 +138,16 @@ object AppModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(LocationResidentApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun configurationApi(moshi: Moshi): ConfigurationApi {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(ConfigurationApi::class.java)
     }
 
 }

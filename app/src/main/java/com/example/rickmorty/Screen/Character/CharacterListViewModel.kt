@@ -3,6 +3,7 @@ package com.example.rickmorty.Screen.Character
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rickmorty.Util.DownloadData
+import com.example.rickmorty.Util.MinMaxIdResult
 import com.example.rickmorty.domain.models.Character
 import com.example.rickmorty.domain.repository.CharacterRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,8 +35,9 @@ class CharacterListViewModel @Inject constructor(
             downloadData.downloadAllData()
             minId = characterRepository.getMinCharacterId() ?: 0
             maxId = characterRepository.getMaxCharacterId() ?: 0
-            maxCurrentId = getMaxIdLimitedFiltered(minId)
-            minCurrentId = getMinIdLimitedFiltered(minId)
+            val minMaxCurrentId = getMinMaxIdLimitedFiltered(minId)
+            maxCurrentId = minMaxCurrentId.maxId ?: 0
+            minCurrentId = minMaxCurrentId.minId ?: 0
             getCharactersLimited(minId)
         }
     }
@@ -45,6 +47,20 @@ class CharacterListViewModel @Inject constructor(
         currentId = minId
         viewModelScope.launch {
             getCharactersLimitedFiltered(minId)
+            _uiState.update { it.copy(isLoading = false) }
+        }
+    }
+
+    fun downloadData() {
+        _uiState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            downloadData.downloadAllData()
+            minId = characterRepository.getMinCharacterId() ?: 0
+            maxId = characterRepository.getMaxCharacterId() ?: 0
+            val minMaxCurrentId = getMinMaxIdLimitedFiltered(minId)
+            maxCurrentId = minMaxCurrentId.maxId ?: 0
+            minCurrentId = minMaxCurrentId.minId ?: 0
+            getCharactersLimited(minId)
             _uiState.update { it.copy(isLoading = false) }
         }
     }
@@ -60,10 +76,10 @@ class CharacterListViewModel @Inject constructor(
             )
         }
 
-        if (isNextPage) {
-            currentId = maxCurrentId + 1
+        currentId = if (isNextPage) {
+            maxCurrentId + 1
         } else {
-            currentId = minCurrentId
+            minCurrentId
         }
         if (currentId < minId) {
             currentId = minId
@@ -78,10 +94,12 @@ class CharacterListViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            maxCurrentId = getMaxIdLimitedFiltered(currentId)
-            minCurrentId = getMinIdLimitedFiltered(currentId)
-            minId = getMinIdFiltered()
-            maxId = getMaxIdFiltered()
+            val minMaxCurrentId = getMinMaxIdLimitedFiltered(currentId)
+            maxCurrentId = minMaxCurrentId.maxId ?: 0
+            minCurrentId = minMaxCurrentId.minId ?: 0
+            val minMaxIdFiltered = getMinMaxIdFiltered()
+            minId = minMaxIdFiltered.minId ?: 0
+            maxId = minMaxIdFiltered.maxId ?: 0
             getCharactersLimitedFiltered(currentId)
             _uiState.update { it.copy(isLoading = false) }
         }
@@ -129,10 +147,10 @@ class CharacterListViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getMaxIdLimitedFiltered(
+    private suspend fun getMinMaxIdLimitedFiltered(
         startId: Int,
-    ): Int {
-        var id = characterRepository.getMaxIdLimitedFiltered(
+    ): MinMaxIdResult {
+        val minMaxid = characterRepository.getMinMaxIdLimitedFiltered(
             startId = startId,
             text = _uiState.value.text,
             statusAlive = _uiState.value.statusAlive,
@@ -153,17 +171,22 @@ class CharacterListViewModel @Inject constructor(
             genderGenderless = _uiState.value.genderGenderless,
             genderunknown = _uiState.value.genderunknown,
         )
-        if (id == null)
-            id = 0
-        return id
+        var maxId = minMaxid.maxId
+        var minId = minMaxid.minId
+        if (maxId == null) {
+            maxId = 0
+        }
+        if (minId == null) {
+            minId = 0
+        }
+        val minMaxIdResult = MinMaxIdResult(minId = minId, maxId = maxId)
+
+        return minMaxIdResult
     }
 
-
-    private suspend fun getMinIdLimitedFiltered(
-        startId: Int,
-    ): Int {
-        var id = characterRepository.getMinIdLimitedFiltered(
-            startId = startId,
+    private suspend fun getMinMaxIdFiltered(
+    ): MinMaxIdResult {
+        val minMaxid = characterRepository.getMinMaxIdFiltered(
             text = _uiState.value.text,
             statusAlive = _uiState.value.statusAlive,
             statusDead = _uiState.value.statusDead,
@@ -183,66 +206,18 @@ class CharacterListViewModel @Inject constructor(
             genderGenderless = _uiState.value.genderGenderless,
             genderunknown = _uiState.value.genderunknown,
         )
-        if (id == null)
-            id = 0
-        return id
+        var maxId = minMaxid?.maxId
+        var minId = minMaxid?.minId
+        if (maxId == null) {
+            maxId = 0
+        }
+        if (minId == null) {
+            minId = 0
+        }
+        val minMaxIdResult = MinMaxIdResult(minId = minId, maxId = maxId)
+
+        return minMaxIdResult
     }
-
-    private suspend fun getMaxIdFiltered(
-    ): Int {
-        var id = characterRepository.getMaxIdFiltered(
-            text = _uiState.value.text,
-            statusAlive = _uiState.value.statusAlive,
-            statusDead = _uiState.value.statusDead,
-            statusUnknown = _uiState.value.statusUnknown,
-            speciesHuman = _uiState.value.speciesHuman,
-            speciesCronenberg = _uiState.value.speciesCronenberg,
-            speciesDisease = _uiState.value.speciesDisease,
-            speciesPoopybutthole = _uiState.value.speciesPoopybutthole,
-            speciesAlien = _uiState.value.speciesAlien,
-            speciesUnknown = _uiState.value.speciesUnknown,
-            speciesRobot = _uiState.value.speciesRobot,
-            speciesAnimal = _uiState.value.speciesAnimal,
-            speciesMythologicalCreature = _uiState.value.speciesMythologicalCreature,
-            speciesHumanoid = _uiState.value.speciesHumanoid,
-            genderFemale = _uiState.value.genderFemale,
-            genderMale = _uiState.value.genderMale,
-            genderGenderless = _uiState.value.genderGenderless,
-            genderunknown = _uiState.value.genderunknown,
-        )
-        if (id == null)
-            id = 0
-        return id
-    }
-
-
-    private suspend fun getMinIdFiltered(
-    ): Int {
-        var id = characterRepository.getMinIdFiltered(
-            text = _uiState.value.text,
-            statusAlive = _uiState.value.statusAlive,
-            statusDead = _uiState.value.statusDead,
-            statusUnknown = _uiState.value.statusUnknown,
-            speciesHuman = _uiState.value.speciesHuman,
-            speciesCronenberg = _uiState.value.speciesCronenberg,
-            speciesDisease = _uiState.value.speciesDisease,
-            speciesPoopybutthole = _uiState.value.speciesPoopybutthole,
-            speciesAlien = _uiState.value.speciesAlien,
-            speciesUnknown = _uiState.value.speciesUnknown,
-            speciesRobot = _uiState.value.speciesRobot,
-            speciesAnimal = _uiState.value.speciesAnimal,
-            speciesMythologicalCreature = _uiState.value.speciesMythologicalCreature,
-            speciesHumanoid = _uiState.value.speciesHumanoid,
-            genderFemale = _uiState.value.genderFemale,
-            genderMale = _uiState.value.genderMale,
-            genderGenderless = _uiState.value.genderGenderless,
-            genderunknown = _uiState.value.genderunknown,
-        )
-        if (id == null)
-            id = 0
-        return id
-    }
-
 
     fun onSearchTextChanged(text: String) {
         _uiState.update { it.copy(text = text) }
@@ -343,7 +318,7 @@ class CharacterListViewModel @Inject constructor(
 
     fun resetStatusFilters() {
         val bool =
-            (_uiState.value.statusAlive || _uiState.value.statusDead || _uiState.value.statusUnknown)
+            !(_uiState.value.statusAlive && _uiState.value.statusDead && _uiState.value.statusUnknown)
         _uiState.update {
             it.copy(
                 statusAlive = bool,
@@ -355,7 +330,7 @@ class CharacterListViewModel @Inject constructor(
 
     fun resetSpeciesFilters() {
         val bool =
-            (_uiState.value.speciesHuman || _uiState.value.speciesCronenberg || _uiState.value.speciesDisease || _uiState.value.speciesPoopybutthole || _uiState.value.speciesAlien || _uiState.value.speciesUnknown || _uiState.value.speciesRobot || _uiState.value.speciesAnimal || _uiState.value.speciesMythologicalCreature || _uiState.value.speciesHumanoid)
+            !(_uiState.value.speciesHuman && _uiState.value.speciesCronenberg && _uiState.value.speciesDisease && _uiState.value.speciesPoopybutthole && _uiState.value.speciesAlien && _uiState.value.speciesUnknown && _uiState.value.speciesRobot && _uiState.value.speciesAnimal && _uiState.value.speciesMythologicalCreature && _uiState.value.speciesHumanoid)
         _uiState.update {
             it.copy(
                 speciesHuman = bool,
@@ -374,7 +349,7 @@ class CharacterListViewModel @Inject constructor(
 
     fun resetGenderFilters() {
         val bool =
-            (_uiState.value.genderFemale || _uiState.value.genderMale || _uiState.value.genderGenderless || _uiState.value.genderunknown)
+            !(_uiState.value.genderFemale && _uiState.value.genderMale && _uiState.value.genderGenderless && _uiState.value.genderunknown)
         _uiState.update {
             it.copy(
                 genderFemale = bool,

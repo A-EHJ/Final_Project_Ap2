@@ -76,7 +76,11 @@ fun CharacterScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = { onBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
                     }
                 }
             )
@@ -152,7 +156,10 @@ fun CharacterDetail(character: Character) {
             modifier = Modifier
                 .background(
                     Brush.horizontalGradient(
-                        colors = listOf(Color(86, 98, 200), Color(39, 43, 51))
+                        colors = listOf(
+                            Color(45, 88, 90),
+                            Color(101, 71, 139)
+                        )
                     )
                 )
                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -163,7 +170,12 @@ fun CharacterDetail(character: Character) {
             CharacterInfoItem("Type", character.character.type)
         }
         CharacterInfoItem("Gender", character.character.gender)
-        CharacterInfoItem("Origin", character.origin)
+        if (character.origin == "") {
+            CharacterInfoItem("Origin", "Unknown")
+
+        } else {
+            CharacterInfoItem("Origin", character.origin)
+        }
         CharacterInfoItem("Last known location", character.location)
     }
 }
