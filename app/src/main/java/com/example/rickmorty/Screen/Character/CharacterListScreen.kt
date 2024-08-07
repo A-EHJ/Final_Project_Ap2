@@ -22,10 +22,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults.filterChipColors
@@ -79,6 +81,7 @@ fun CustomFilterChip(
 fun CharacterListScreen(
     viewModel: CharacterListViewModel = hiltViewModel(),
     onCharacterClick: (Int) -> Unit,
+    drawer: DrawerState,
     onPreviousPageClick: () -> Unit = { viewModel.getCharacterLimited(false) },
     onNextPageClick: () -> Unit = { viewModel.getCharacterLimited(true) },
     onGetCharacterLimitedFiltered: () -> Unit = { viewModel.getCharacterLimited() },
@@ -106,8 +109,8 @@ fun CharacterListScreen(
     onResetStatusFilters: () -> Unit = { viewModel.resetStatusFilters() },
     onResetSpeciesFilters: () -> Unit = { viewModel.resetSpeciesFilters() },
     onResetGenderFilters: () -> Unit = { viewModel.resetGenderFilters() },
-
-    ) {
+    onDownloadData: () -> Unit = { viewModel.downloadData() },
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val sheetState = rememberModalBottomSheetState()
@@ -128,7 +131,7 @@ fun CharacterListScreen(
                 actions = {
                     Row {
                         IconButton(onClick = {
-
+                            scope.launch { drawer.open() }
                         }) {
                             Icon(
                                 Icons.Filled.Menu,
@@ -176,7 +179,7 @@ fun CharacterListScreen(
             }
         }
     ) { innerPadding ->
-        CharacterListBody(innerPadding, uiState, onCharacterClick)
+        CharacterListBody(innerPadding, uiState, onCharacterClick, onDownloadData)
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = {
@@ -192,13 +195,28 @@ fun CharacterListScreen(
                     trailingIcon = {
                         Icon(
                             Icons.Default.Search,
-                            contentDescription = "Search"
+                            contentDescription = "Search",
+                            modifier = Modifier.clickable {
+                                scope
+                                    .launch { sheetState.hide() }
+                                    .invokeOnCompletion {
+                                        if (!sheetState.isVisible) {
+                                            showBottomSheet = false
+                                        }
+                                    }
+                                onGetCharacterLimitedFiltered()
+                            }
                         )
                     },
                     shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                 )
-                Row {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Spacer(modifier = Modifier.width(16.dp))
                     Button(onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
@@ -207,28 +225,31 @@ fun CharacterListScreen(
                         }
                     }) {
                         Text("Cancel")
+                        Icon(Icons.Default.Close, contentDescription = "Back")
                     }
                     Button(onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
                                 showBottomSheet = false
                             }
-                            viewModel.getCharacterLimited(true)
                         }
+                        onGetCharacterLimitedFiltered()
                     }) {
                         Text("Filter")
+                        Icon(Icons.Default.Search, contentDescription = "Back")
                     }
                     Button(onClick = {
+                        resetFilters()
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
                                 showBottomSheet = false
                             }
-                            resetFilters()
-                            viewModel.getCharacterLimited(true)
                         }
+                        onGetCharacterLimitedFiltered()
                     }) {
                         Text("Reset")
                     }
+                    Spacer(modifier = Modifier.width(16.dp))
                 }
 
                 Column(
@@ -335,12 +356,6 @@ fun CharacterListScreen(
                             onSelectedChange = { onSpeciesRobotChange() },
                             text = "Robot"
                         )
-                        CustomFilterChip(
-                            selected = uiState.speciesAnimal,
-                            onSelectedChange = { onSpeciesAnimalChange() },
-                            text = "Animal"
-                        )
-
                     }
                     Row(
                         modifier = Modifier
@@ -354,9 +369,9 @@ fun CharacterListScreen(
                             text = "Mythological Creature"
                         )
                         CustomFilterChip(
-                            selected = uiState.speciesHumanoid,
-                            onSelectedChange = { onSpeciesHumanoidChange() },
-                            text = "Mythological Creature"
+                            selected = uiState.speciesAnimal,
+                            onSelectedChange = { onSpeciesAnimalChange() },
+                            text = "Animal"
                         )
                         CustomFilterChip(
                             selected = uiState.speciesHumanoid,
@@ -374,6 +389,7 @@ fun CharacterListScreen(
                             .widthIn(10.dp, 100.dp)
                             .align(Alignment.CenterHorizontally)
                             .clickable {
+                                onResetGenderFilters()
                             }
                     )
                     Row(
@@ -415,6 +431,7 @@ private fun CharacterListBody(
     innerPadding: PaddingValues,
     uiState: CharactersUIState,
     onCharacterClick: (Int) -> Unit,
+    onDownloadData: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -430,12 +447,26 @@ private fun CharacterListBody(
     ) {
         if (uiState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (uiState.errorMessage.isNotEmpty()) {
-            Text(
-                text = uiState.errorMessage,
-                color = Color.Red,
-                modifier = Modifier.align(Alignment.Center)
-            )
+        } else if (uiState.errorMessage.isNotEmpty() || uiState.characters.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "An error occurred",
+                        color = Color.Red,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { onDownloadData() }) {
+                        Text("Retry")
+                    }
+                }
+            }
+
         } else {
             Spacer(modifier = Modifier.height(16.dp))
             LazyColumn(
@@ -505,22 +536,20 @@ fun CharacterItem(character: Character, onCharacterClick: (Int) -> Unit) {
                         text = "Status: ${character.character.status}", style = bodyTextStyle
                     )
                 }
-
-                Row {
-                    Text(
-                        text = "Species: ${character.character.species}", style = bodyTextStyle
-                    )
-                    Spacer(modifier = Modifier.width(15.dp))
-                    Text(
-                        text = "Gender: ${character.character.gender}", style = bodyTextStyle
-                    )
-
-                }
                 Text(
-                    text = "Last known Location: ${character.location}", style = bodyTextStyle
+                    text = "Species: ${character.character.species}", style = bodyTextStyle
+                )
+                Spacer(modifier = Modifier.width(15.dp))
+                Text(
+                    text = "Gender: ${character.character.gender}", style = bodyTextStyle
                 )
                 Text(
-                    text = "First seen: ${character.origin}", style = bodyTextStyle
+                    text = "Last known Location: ${if (character.location == "") character.location else "Unknown"}",
+                    style = bodyTextStyle
+                )
+                Text(
+                    text = "First seen: ${if (character.origin == "") character.origin else "Unknown"}",
+                    style = bodyTextStyle
                 )
             }
         }
@@ -540,7 +569,6 @@ fun getStatusColor(status: String): Color {
 @Preview
 @Composable
 fun PreviewCharacterItem() {
-
     CharacterItem(character = Character(
         character = CharacterEntity(
             id = 1,
