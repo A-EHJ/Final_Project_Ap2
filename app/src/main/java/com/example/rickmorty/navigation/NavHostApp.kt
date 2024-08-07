@@ -6,9 +6,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.example.rickmorty.Screen.Character.CharacterListScreen
-import com.example.rickmorty.Screen.Character.CharacterScreen
-import com.example.rickmorty.Screen.Location.LocationListScreen
+import com.example.rickmorty.screen.character.CharacterListScreen
+import com.example.rickmorty.screen.character.CharacterScreen
+import com.example.rickmorty.screen.location.LocationListScreen
 
 @Composable
 fun NavHostApp(navHostController: NavHostController, drawerState: DrawerState) {

@@ -1,10 +1,10 @@
 package com.example.rickmorty.data.repository
 
-import com.example.rickmorty.Util.MinMaxIdResult
 import com.example.rickmorty.data.local.dao.CharacterDao
 import com.example.rickmorty.data.local.entities.CharacterEntity
 import com.example.rickmorty.data.network.remote.Api.CharacterApi
 import com.example.rickmorty.data.network.remote.dto.CharacterDto
+import com.example.rickmorty.util.MinMaxIdResult
 import javax.inject.Inject
 
 class CharacterRepositoryImpl @Inject constructor(

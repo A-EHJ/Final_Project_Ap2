@@ -1,4 +1,4 @@
-package com.example.rickmorty.Util
+package com.example.rickmorty.util
 
 import com.example.rickmorty.data.local.entities.CharacterEntity
 import com.example.rickmorty.data.local.entities.CharacterEpisodeEntity
@@ -148,12 +148,13 @@ class DownloadData @Inject constructor(
 
     suspend fun checkVersion(): Boolean {
         var versionLocal: Int? = null
+        var versionApi: Int? = null
         try {
             versionLocal = configurationRepositoryImpl.getVersionFromDb() ?: 0
+            versionApi = configurationRepositoryImpl.getVersionFromApi()
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        var versionApi: Int? = configurationRepositoryImpl.getVersionFromApi()
 
         return versionApi == versionLocal
     }

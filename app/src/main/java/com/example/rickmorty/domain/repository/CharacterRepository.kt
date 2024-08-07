@@ -1,10 +1,10 @@
 package com.example.rickmorty.domain.repository
 
-import com.example.rickmorty.Util.MinMaxIdResult
 import com.example.rickmorty.data.local.entities.CharacterEntity
 import com.example.rickmorty.data.repository.CharacterRepositoryImpl
 import com.example.rickmorty.data.repository.LocationRepositoryImpl
 import com.example.rickmorty.domain.models.Character
+import com.example.rickmorty.util.MinMaxIdResult
 import javax.inject.Inject
 
 

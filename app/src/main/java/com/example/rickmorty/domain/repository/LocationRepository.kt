@@ -1,11 +1,11 @@
 package com.example.rickmorty.domain.repository
 
-import com.example.rickmorty.Util.MinMaxIdResult
 import com.example.rickmorty.data.repository.CharacterRepositoryImpl
 import com.example.rickmorty.data.repository.LocationRepositoryImpl
 import com.example.rickmorty.data.repository.LocationResidentRepositoryImpl
 import com.example.rickmorty.domain.models.CharacterIdUrl
 import com.example.rickmorty.domain.models.LocationWithCharacterIdUrl
+import com.example.rickmorty.util.MinMaxIdResult
 import javax.inject.Inject
 
 class LocationRepository @Inject constructor(

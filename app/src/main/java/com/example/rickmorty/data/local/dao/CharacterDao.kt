@@ -6,8 +6,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import androidx.room.Upsert
-import com.example.rickmorty.Util.MinMaxIdResult
 import com.example.rickmorty.data.local.entities.CharacterEntity
+import com.example.rickmorty.util.MinMaxIdResult
 
 @Dao
 interface CharacterDao {

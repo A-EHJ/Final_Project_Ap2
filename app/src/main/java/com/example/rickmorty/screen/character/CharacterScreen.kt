@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Character
+package com.example.rickmorty.screen.character
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -94,7 +94,7 @@ fun CharacterScreen(
 @Composable
 private fun CharacterBody(
     innerPadding: PaddingValues,
-    uiState: UIState,
+    characterBodyState: CharacterBodyState,
 ) {
     Box(
         modifier = Modifier
@@ -110,20 +110,20 @@ private fun CharacterBody(
             )
     ) {
         when {
-            uiState.isLoading -> {
+            characterBodyState.isLoading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
-            uiState.errorMessage.isNotEmpty() -> {
+            characterBodyState.errorMessage.isNotEmpty() -> {
                 Text(
-                    text = uiState.errorMessage,
+                    text = characterBodyState.errorMessage,
                     color = Color.Red,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
 
             else -> {
-                CharacterDetail(uiState.character)
+                CharacterDetail(characterBodyState.character)
             }
         }
     }
@@ -183,12 +183,7 @@ fun CharacterDetail(character: Character) {
 @Composable
 fun CharacterStatusItem(label: String, value: String) {
 
-    val statusColor = when (value.lowercase()) {
-        "alive" -> Color.Green
-        "dead" -> Color.Red
-        "unknown" -> Color.Yellow
-        else -> Color.Gray
-    }
+    val statusColor = getStatusColor(value)
     Row(
         modifier = Modifier
             .fillMaxWidth()

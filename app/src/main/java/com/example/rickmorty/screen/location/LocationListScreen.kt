@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Location
+package com.example.rickmorty.screen.location
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -315,7 +315,13 @@ fun LocationItem(
             .padding(8.dp)
             .clickable { onCharacterClick(locationWithCharacterIdUrl.location.id) }
             .clip(RoundedCornerShape(16.dp)) // Rounded corners
-            .border(2.dp, Color.White, RoundedCornerShape(16.dp)) // Border based on status
+            .border(
+                2.dp, Brush.verticalGradient(
+                    listOf(
+                        Color(139, 98, 190), Color(86, 98, 200), Color(114, 173, 219, 255)
+                    )
+                ), RoundedCornerShape(16.dp)
+            ) // Border based on status
             .background(
                 Brush.verticalGradient(
                     colors = listOf(

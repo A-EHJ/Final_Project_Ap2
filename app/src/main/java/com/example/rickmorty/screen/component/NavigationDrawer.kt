@@ -1,4 +1,4 @@
-package com.example.rickmorty.Screen.Component
+package com.example.rickmorty.screen.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
@@ -48,7 +49,7 @@ fun NavigationDrawer(
         NavigationItem(
             title = "Locations",
             selectedIcon = Icons.Filled.AccountCircle,
-            unselectedIcon = Icons.Outlined.AccountCircle
+            unselectedIcon = Icons.Outlined.LocationOn
         ),
     )
     val selectedItem = remember { mutableStateOf(items[0]) }
