@@ -328,7 +328,7 @@ fun CharacterItem(character: Character, onCharacterClick: (Int) -> Unit) {
         fontSize = 16.sp, fontWeight = FontWeight.Normal, color = Color.White
     )
 
-    val borderColor = getStatusColor(character.character.status)
+    val borderColor = GetStatusColor(character.character.status)
 
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -366,7 +366,7 @@ fun CharacterItem(character: Character, onCharacterClick: (Int) -> Unit) {
                         modifier = Modifier
                             .size(10.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(getStatusColor(character.character.status))
+                            .background(GetStatusColor(character.character.status))
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(

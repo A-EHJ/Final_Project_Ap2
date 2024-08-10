@@ -1,7 +1,7 @@
-package com.example.rickmorty.screen.character
+package com.example.rickmorty.screen.location
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,43 +34,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.rickmorty.domain.models.Character
-
-
-val titleTextStyle = androidx.compose.ui.text.TextStyle(
-    fontSize = 20.sp,
-    fontWeight = FontWeight.Bold,
-    color = Color.White
-)
-val bodyTextStyle = androidx.compose.ui.text.TextStyle(
-    fontSize = 16.sp,
-    fontWeight = FontWeight.Normal,
-    color = Color.White
-)
+import com.example.rickmorty.domain.models.CharacterIIN
+import com.example.rickmorty.domain.models.LocationWithCharacterIIN
+import com.example.rickmorty.screen.character.bodyTextStyle
+import com.example.rickmorty.screen.character.titleTextStyle
+import com.example.rickmorty.screen.location.LocationScreenViewModel.LocationBodyUIState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CharacterScreen(
-    viewModel: CharacterBodyViewModel = hiltViewModel(),
-    characterId: Int,
+fun LocationScreen(
+    viewModel: LocationScreenViewModel = hiltViewModel(),
+    locationId: Int,
+    charactersId: List<Int>,
     onBack: () -> Unit,
+    onCharacterClick: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key1 = characterId) {
-        viewModel.getCharacter(characterId)
+    LaunchedEffect(key1 = locationId) {
+        viewModel.getLocation(locationId, charactersId)
     }
 
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
         topBar = {
             TopAppBar(
-                title = { Text("Character Details", color = Color.White) },
+                title = { Text("Location Details", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(39, 43, 51),
                     titleContentColor = Color.White
@@ -86,15 +82,16 @@ fun CharacterScreen(
             )
         },
         content = { innerPadding ->
-            CharacterBody(innerPadding, uiState)
+            LocationBody(innerPadding, uiState, onCharacterClick)
         }
     )
 }
 
 @Composable
-private fun CharacterBody(
+fun LocationBody(
     innerPadding: PaddingValues,
-    characterBodyState: CharacterBodyState,
+    uiState: LocationBodyUIState,
+    onCharacterClick: (Int) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -110,28 +107,27 @@ private fun CharacterBody(
             )
     ) {
         when {
-            characterBodyState.isLoading -> {
+            uiState.isLoading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
-            characterBodyState.errorMessage.isNotEmpty() -> {
+            uiState.errorMessage.isNotEmpty() -> {
                 Text(
-                    text = characterBodyState.errorMessage,
+                    text = uiState.errorMessage,
                     color = Color.Red,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
 
             else -> {
-                CharacterDetail(characterBodyState.character)
+                LocationDetail(uiState.locationWithCharacterIIN, onCharacterClick)
             }
         }
     }
 }
 
 @Composable
-fun CharacterDetail(character: Character) {
-
+fun LocationDetail(location: LocationWithCharacterIIN, onCharacterClick: (Int) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -139,18 +135,9 @@ fun CharacterDetail(character: Character) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AsyncImage(
-            model = character.character.image,
-            contentDescription = "Character Image",
-            modifier = Modifier
-                .size(200.dp)
-                .clip(CircleShape)
-                .border(2.dp, Color.White, CircleShape)
-                .background(Color.Gray.copy(alpha = 0.3f))
-        )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = character.character.name,
+            text = location.location.name,
             color = Color.White,
             style = titleTextStyle,
             modifier = Modifier
@@ -164,47 +151,14 @@ fun CharacterDetail(character: Character) {
                 )
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         )
-        CharacterStatusItem("Status", character.character.status)
-        CharacterInfoItem("Species", character.character.species)
-        if (character.character.type.isNotEmpty()) {
-            CharacterInfoItem("Type", character.character.type)
-        }
-        CharacterInfoItem("Gender", character.character.gender)
-        if (character.origin == "") {
-            CharacterInfoItem("Origin", "Unknown")
-
-        } else {
-            CharacterInfoItem("Origin", character.origin)
-        }
-        CharacterInfoItem("Last known location", character.location)
+        LocationInfoItem("Type", location.location.type)
+        LocationInfoItem("Dimension", location.location.dimension)
+        CharacterGrid(characters = location.characters, onClick = onCharacterClick)
     }
 }
 
 @Composable
-fun CharacterStatusItem(label: String, value: String) {
-
-    val statusColor = GetStatusColor(value)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = "$label:", color = Color.Gray, style = bodyTextStyle)
-        Text(
-            text = value,
-            color = statusColor,
-            style = bodyTextStyle,
-            modifier = Modifier
-                .background(statusColor.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-        )
-    }
-}
-
-@Composable
-fun CharacterInfoItem(label: String, value: String) {
+fun LocationInfoItem(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -213,5 +167,47 @@ fun CharacterInfoItem(label: String, value: String) {
     ) {
         Text(text = "$label:", color = Color.Gray, style = bodyTextStyle)
         Text(text = value, color = Color.White, style = bodyTextStyle)
+    }
+}
+
+@Composable
+fun CharacterGrid(characters: List<CharacterIIN>, onClick: (Int) -> Unit) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(characters.size) { index ->
+            val character = characters[index]
+            CharacterItem(character, onClick)
+        }
+    }
+}
+
+@Composable
+fun CharacterItem(characterIIN: CharacterIIN, onClick: (Int) -> Unit) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.Gray.copy(alpha = 0.3f))
+            .clickable { onClick(characterIIN.id) }
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        AsyncImage(
+            model = characterIIN.image,
+            contentDescription = "Character Image",
+            modifier = Modifier
+                .size(100.dp)
+                .clip(RoundedCornerShape(16.dp))
+        )
+        Text(
+            text = characterIIN.name,
+            color = Color.White,
+            style = titleTextStyle,
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }

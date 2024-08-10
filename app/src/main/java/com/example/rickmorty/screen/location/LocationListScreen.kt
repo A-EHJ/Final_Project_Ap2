@@ -21,23 +21,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults.filterChipColors
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -61,29 +55,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
-import com.example.rickmorty.domain.models.LocationWithCharacterIdUrl
+import com.example.rickmorty.domain.models.LocationWithCharacterIdImage
 import kotlinx.coroutines.launch
-
-@Composable
-fun CustomFilterChip(
-    selected: Boolean,
-    onSelectedChange: () -> Unit,
-    text: String,
-) {
-    FilterChip(selected = selected, onClick = { onSelectedChange() }, label = {
-        Text(text)
-    }, colors = filterChipColors()
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationListScreen(
     viewModel: LocationListViewModel = hiltViewModel(),
-    onLocationClick: (Int) -> Unit,
+    onLocationClick: (id: Int, characters: List<Int>) -> Unit,
     drawer: DrawerState,
     onPreviousPageClick: () -> Unit = { viewModel.getCharacterLimited(false) },
     onNextPageClick: () -> Unit = { viewModel.getCharacterLimited(true) },
+    onTextChange: (String) -> Unit = { viewModel.onSearchTextChanged(it) },
+    onResetFilters: () -> Unit = { viewModel.resetFilters() },
+    onGetCharacterLimitedFiltered: () -> Unit = { viewModel.getLocationsLimitedFiltered() },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -91,13 +76,17 @@ fun LocationListScreen(
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
 
+    val unShowBottomSheet: () -> Unit = {
+        showBottomSheet = false
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black),
         topBar = {
             TopAppBar(
-                title = { Text("Character List", color = Color.White) },
+                title = { Text("Location List", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(39, 43, 51),
                     titleContentColor = Color.White
@@ -153,100 +142,26 @@ fun LocationListScreen(
             }
         }
     ) { innerPadding ->
-        CharacterListBody(innerPadding, uiState, onLocationClick)
+        LocationListBody(innerPadding, uiState, onLocationClick)
         if (showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    showBottomSheet = false
-                },
-                sheetState = sheetState
-            ) {
-
-                TextField(
-                    value = uiState.text,
-                    onValueChange = { },
-                    label = { Text("Label") },
-                    trailingIcon = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = "Search",
-                            modifier = Modifier.clickable {
-                                scope
-                                    .launch { sheetState.hide() }
-                                    .invokeOnCompletion {
-                                        if (!sheetState.isVisible) {
-                                            showBottomSheet = false
-                                        }
-                                    }
-                                //onGetCharacterLimitedFiltered()
-                            }
-                        )
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Button(onClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showBottomSheet = false
-                            }
-                        }
-                    }) {
-                        Text("Cancel")
-                        Icon(Icons.Default.Close, contentDescription = "Back")
-                    }
-                    Button(onClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showBottomSheet = false
-                            }
-                        }
-                    }) {
-                        Text("Filter")
-                        Icon(Icons.Default.Search, contentDescription = "Back")
-                    }
-                    Button(onClick = {
-                        //resetFilters()
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showBottomSheet = false
-                            }
-                        }
-                        //onGetCharacterLimitedFiltered()
-                    }) {
-                        Text("Reset")
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                }
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        "Filters",
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .align(Alignment.CenterHorizontally)
-                    )
-                    HorizontalDivider(thickness = 3.dp)
-                }
-            }
+            ModalLocationBottonSheet(
+                unShowBottomSheet,
+                onGetCharacterLimitedFiltered,
+                onTextChange,
+                onResetFilters,
+                sheetState,
+                uiState,
+                scope
+            )
         }
     }
 }
 
-
 @Composable
-private fun CharacterListBody(
+fun LocationListBody(
     innerPadding: PaddingValues,
     uiState: LocationUIState,
-    onCharacterClick: (Int) -> Unit,
+    onCharacterClick: (Int, List<Int>) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -262,7 +177,7 @@ private fun CharacterListBody(
     ) {
         if (uiState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (uiState.errorMessage.isNotEmpty() || uiState.locationWithCharacterIdUrl.isEmpty()) {
+        } else if (uiState.errorMessage.isNotEmpty() || uiState.locationWithCharacterIdImage.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -287,8 +202,8 @@ private fun CharacterListBody(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(uiState.locationWithCharacterIdUrl.size) { index ->
-                    val locations = uiState.locationWithCharacterIdUrl[index]
+                items(uiState.locationWithCharacterIdImage.size) { index ->
+                    val locations = uiState.locationWithCharacterIdImage[index]
                     LocationItem(locations, onCharacterClick)
                 }
             }
@@ -296,11 +211,10 @@ private fun CharacterListBody(
     }
 }
 
-
 @Composable
 fun LocationItem(
-    locationWithCharacterIdUrl: LocationWithCharacterIdUrl,
-    onCharacterClick: (Int) -> Unit,
+    locationWithCharacterIdImage: LocationWithCharacterIdImage,
+    onCharacterClick: (Int, List<Int>) -> Unit,
 ) {
     val titleTextStyle = androidx.compose.ui.text.TextStyle(
         fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White
@@ -313,7 +227,11 @@ fun LocationItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onCharacterClick(locationWithCharacterIdUrl.location.id) }
+            .clickable {
+                onCharacterClick(
+                    locationWithCharacterIdImage.location.id,
+                    locationWithCharacterIdImage.characters.map { it.id })
+            }
             .clip(RoundedCornerShape(16.dp)) // Rounded corners
             .border(
                 2.dp, Brush.verticalGradient(
@@ -321,7 +239,7 @@ fun LocationItem(
                         Color(139, 98, 190), Color(86, 98, 200), Color(114, 173, 219, 255)
                     )
                 ), RoundedCornerShape(16.dp)
-            ) // Border based on status
+            )
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
@@ -337,7 +255,7 @@ fun LocationItem(
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
-                    text = "Name: ${locationWithCharacterIdUrl.location.name}",
+                    text = "Name: ${locationWithCharacterIdImage.location.name}",
                     style = titleTextStyle
                 )
                 Row(
@@ -350,24 +268,24 @@ fun LocationItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Dimension: ${locationWithCharacterIdUrl.location.dimension}",
+                        text = "Dimension: ${locationWithCharacterIdImage.location.dimension}",
                         style = bodyTextStyle
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row {
-                    locationWithCharacterIdUrl.characters.takeLast(6).forEach { character ->
+                    locationWithCharacterIdImage.characters.takeLast(6).forEach { character ->
                         Image(
                             painter = rememberAsyncImagePainter(
                                 ImageRequest.Builder(LocalContext.current)
-                                    .data(data = character.url)
+                                    .data(data = character.image)
                                     .apply(block = fun ImageRequest.Builder.() {
                                         transformations(CircleCropTransformation())
                                     }).build()
                             ),
                             contentDescription = null,
                             modifier = Modifier
-                                .size(50.dp) // Aumenta el tamaño de la imagen
+                                .size(50.dp)
                                 .padding(4.dp)
                         )
                     }

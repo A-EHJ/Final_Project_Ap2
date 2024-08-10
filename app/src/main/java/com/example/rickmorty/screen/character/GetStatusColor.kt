@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun getStatusColor(status: String): Color {
+fun GetStatusColor(status: String): Color {
     return when (status) {
         "Alive" -> Color.Green
         "unknown" -> Color.Yellow

@@ -2,7 +2,7 @@ package com.example.rickmorty.screen.location
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.rickmorty.domain.models.LocationWithCharacterIdUrl
+import com.example.rickmorty.domain.models.LocationWithCharacterIdImage
 import com.example.rickmorty.domain.repository.LocationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,14 +78,31 @@ class LocationListViewModel @Inject constructor(
         }
     }
 
+    fun getLocationsLimitedFiltered() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            currentId = minId
+            getLocationsLimited(minId)
+            _uiState.update { it.copy(isLoading = false) }
+        }
+    }
+
     private suspend fun getLocationsLimited(id: Int) {
-        locationRepository.getLocationsLimited(id).let { locations ->
+        locationRepository.getLocationsLimitedFiltered(id, _uiState.value.text).let { locations ->
             _uiState.update {
                 it.copy(
-                    locationWithCharacterIdUrl = locations, isLoading = false, errorMessage = ""
+                    locationWithCharacterIdImage = locations, isLoading = false, errorMessage = ""
                 )
             }
         }
+    }
+
+    fun onSearchTextChanged(text: String) {
+        _uiState.update { it.copy(text = text) }
+    }
+
+    fun resetFilters() {
+        _uiState.update { it.copy(text = "") }
     }
 }
 
@@ -93,7 +110,7 @@ data class LocationUIState(
     val isNextPageAvailable: Boolean = true,
     val isPreviousPageAvailable: Boolean = true,
     val isLoading: Boolean = false,
-    val locationWithCharacterIdUrl: List<LocationWithCharacterIdUrl> = emptyList(),
+    val locationWithCharacterIdImage: List<LocationWithCharacterIdImage> = emptyList(),
     val errorMessage: String = "",
     val text: String = "",
 )

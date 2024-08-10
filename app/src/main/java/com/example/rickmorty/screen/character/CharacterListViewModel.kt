@@ -39,7 +39,6 @@ class CharacterListViewModel @Inject constructor(
             maxCurrentId = minMaxCurrentId.maxId ?: 0
             minCurrentId = minMaxCurrentId.minId ?: 0
             getCharactersLimited(minId)
-            _uiState.update { it.copy(isLoading = false) }
         }
     }
 

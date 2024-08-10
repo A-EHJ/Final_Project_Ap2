@@ -3,8 +3,10 @@ package com.example.rickmorty.domain.repository
 import com.example.rickmorty.data.repository.CharacterRepositoryImpl
 import com.example.rickmorty.data.repository.LocationRepositoryImpl
 import com.example.rickmorty.data.repository.LocationResidentRepositoryImpl
-import com.example.rickmorty.domain.models.CharacterIdUrl
-import com.example.rickmorty.domain.models.LocationWithCharacterIdUrl
+import com.example.rickmorty.domain.models.CharacterIIN
+import com.example.rickmorty.domain.models.CharacterIdAndImage
+import com.example.rickmorty.domain.models.LocationWithCharacterIIN
+import com.example.rickmorty.domain.models.LocationWithCharacterIdImage
 import com.example.rickmorty.util.MinMaxIdResult
 import javax.inject.Inject
 
@@ -13,9 +15,23 @@ class LocationRepository @Inject constructor(
     private val locationRepositoryImpl: LocationRepositoryImpl,
     private val locationResidentRepositoryImpl: LocationResidentRepositoryImpl,
 ) {
-    suspend fun getLocations() = locationRepositoryImpl.getLocations()
-    suspend fun getLocationById(locationId: Int) =
-        locationRepositoryImpl.getLocationById(locationId)
+    suspend fun getLocationById(
+        locationId: Int,
+        charactersId: List<Int>,
+    ): LocationWithCharacterIIN {
+
+        val listCharacter = mutableListOf<CharacterIIN>()
+        for (id in charactersId) {
+            val character = characterRepositoryImpl.getCharacterById(id)
+            listCharacter.add(CharacterIIN(character!!.id, character.image, character.name))
+        }
+
+        return LocationWithCharacterIIN(
+            locationRepositoryImpl.getLocationById(locationId)!!,
+            listCharacter
+        )
+
+    }
 
     suspend fun getLocationResidents(locationId: Int): List<Int> =
         locationResidentRepositoryImpl.getCharactersIdByLocation(locationId)
@@ -52,18 +68,21 @@ class LocationRepository @Inject constructor(
         return minMaxIdResult
     }
 
-    suspend fun getLocationsLimited(startId: Int): List<LocationWithCharacterIdUrl> {
-        val locations = locationRepositoryImpl.getLocationsLimited(startId)
-        val locationWithCharacterIdUrl = mutableListOf<LocationWithCharacterIdUrl>()
+    suspend fun getLocationsLimitedFiltered(
+        startId: Int,
+        text: String,
+    ): List<LocationWithCharacterIdImage> {
+        val locations = locationRepositoryImpl.getLocationsLimited(startId,text)
+        val locationWithCharacterIdImage = mutableListOf<LocationWithCharacterIdImage>()
         for (location in locations) {
-            val listCharacter = mutableListOf<CharacterIdUrl>()
+            val listCharacter = mutableListOf<CharacterIdAndImage>()
             val charactersId = locationResidentRepositoryImpl.getCharactersIdByLocation(location.id)
             for (id in charactersId) {
                 val character = characterRepositoryImpl.getCharacterById(id)
-                listCharacter.add(CharacterIdUrl(character!!.id, character.image))
+                listCharacter.add(CharacterIdAndImage(character!!.id, character.image))
             }
-            locationWithCharacterIdUrl.add(LocationWithCharacterIdUrl(location, listCharacter))
+            locationWithCharacterIdImage.add(LocationWithCharacterIdImage(location, listCharacter))
         }
-        return locationWithCharacterIdUrl
+        return locationWithCharacterIdImage
     }
 }
