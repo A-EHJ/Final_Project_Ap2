@@ -17,7 +17,8 @@ class LocationRepositoryImpl @Inject constructor(
 
     suspend fun getLocationById(locationId: Int) = locationDao.getLocationById(locationId)
 
-    suspend fun getLocationsLimited(startId: Int) = locationDao.getLocationsLimited(startId)
+    suspend fun getLocationsLimited(startId: Int, text: String) =
+        locationDao.getLocationsLimited(startId, text)
 
     suspend fun getMinMaxIdFiltered() =
         locationDao.getMinMaxIdFiltered()

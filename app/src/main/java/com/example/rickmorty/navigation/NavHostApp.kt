@@ -9,6 +9,7 @@ import androidx.navigation.toRoute
 import com.example.rickmorty.screen.character.CharacterListScreen
 import com.example.rickmorty.screen.character.CharacterScreen
 import com.example.rickmorty.screen.location.LocationListScreen
+import com.example.rickmorty.screen.location.LocationScreen
 
 @Composable
 fun NavHostApp(navHostController: NavHostController, drawerState: DrawerState) {
@@ -18,7 +19,9 @@ fun NavHostApp(navHostController: NavHostController, drawerState: DrawerState) {
     ) {
         composable<Screen.CharacterList> {
             CharacterListScreen(
-                onCharacterClick = { navHostController.navigate(Screen.CharacterBody(it)) },
+                onCharacterClick = { characterId ->
+                    navHostController.navigate(Screen.CharacterBody(characterId))
+                },
                 drawer = drawerState
             )
         }
@@ -33,8 +36,20 @@ fun NavHostApp(navHostController: NavHostController, drawerState: DrawerState) {
 
         composable<Screen.LocationList> {
             LocationListScreen(
-                onLocationClick = { },
+                onLocationClick = { id, charactersId ->
+                    navHostController.navigate(Screen.LocationBody(id, charactersId))
+                },
                 drawer = drawerState
+            )
+        }
+
+        composable<Screen.LocationBody> {
+            val args = it.toRoute<Screen.LocationBody>()
+            LocationScreen(
+                locationId = args.locationId,
+                charactersId = args.charactersId,
+                onBack = { navHostController.popBackStack() },
+                onCharacterClick = { navHostController.navigate(Screen.CharacterBody(it)) }
             )
         }
     }

@@ -151,9 +151,14 @@ class DownloadData @Inject constructor(
         var versionApi: Int? = null
         try {
             versionLocal = configurationRepositoryImpl.getVersionFromDb() ?: 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        try {
             versionApi = configurationRepositoryImpl.getVersionFromApi()
         } catch (e: Exception) {
             e.printStackTrace()
+            return true
         }
 
         return versionApi == versionLocal
