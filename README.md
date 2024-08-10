@@ -120,12 +120,6 @@ object AppModule {
     fun provideCharacterDao(db: AppDatabase): CharacterDao {
         return db.characterDao()
     }
-
-    @Provides
-    @Singleton
-    fun provideCharacterRepository(api: RickAndMortyApi, dao: CharacterDao): CharacterRepository {
-        return CharacterRepositoryImpl(api, dao)
-    }
 }
 ```
 
